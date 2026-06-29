@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLIMAREON | Expert en Climatisation Haute Couture</title>
+<!-- jsPDF for invoice generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg-dark: #04091a; 
+  --bg-card: #0b1536;
+  --bg-card-hover: #111f4d;
+  --accent-cyan: #00f2fe;
+  --accent-blue: #0066ff;
+  --text-light: #f8fafc;
+  --text-muted: #94a3b8;
+  --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.2);
+}
+
+html { overflow-x: hidden; max-width: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+
+body { 
+  background-color: var(--bg-dark); 
+  color: var(--text-light); 
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  margin: 0; padding: 0; width: 100%; position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed; top: -10%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(4, 9, 26, 0) 70%);
+  z-index: -1; pointer-events: none;
+}
+
+header { 
+  background: #ffffff; position: sticky; top: 0; z-index: 100; 
+  padding: 15px 40px; border-bottom: 2px solid var(--accent-blue); 
+  display: flex; justify-content: space-between; align-items: center; 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%;
+}
+
+.logo-container {
+  display: flex; align-items: center; text-decoration: none;
+  cursor: pointer; transition: transform 0.3s ease;
+}
+.logo-container:hover { transform: scale(1.02); }
+.logo-text-group { display: flex; flex-direction: column; justify-content: center; }
+.logo-title {
+  font-weight: 800; font-size: 26px; letter-spacing: 2px; line-height: 1;
+  background: linear-gradient(135deg, #04091a 30%, var(--accent-blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+.logo-subtitle {
+  font-size: 9px; letter-spacing: 1.8px; color: #475569; font-weight: 600;
+  margin-top: 4px; text-transform: uppercase;
+  border-top: 1px solid rgba(0, 102, 255, 0.3); padding-top: 2px;
+}
+
+.header-actions { display: flex; align-items: center; gap: 25px; }
+.cart-icon-wrapper {
+  position: relative; cursor: pointer; color: var(--accent-blue);
+  transition: transform 0.3s, color 0.3s; display: flex; align-items: center;
+}
+.cart-icon-wrapper:hover { transform: scale(1.1); color: #04091a; }
+.cart-badge {
+  position: absolute; top: -6px; right: -8px; background: var(--accent-blue);
+  color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 20px; box-shadow: 0 0 10px rgba(0, 102, 255, 0.5);
+}
+
+.menu-toggle {
+  background: none; border: none; cursor: pointer; display: flex;
+  flex-direction: column; gap: 6px; padding: 6px; z-index: 1100;
+}
+.menu-toggle span {
+  display: block; width: 26px; height: 2.5px;
+  background: linear-gradient(90deg, var(--accent-blue), #04091a);
+  border-radius: 2px; transition: all 0.3s ease;
+}
+
+.floating-cart-bubble {
+  position: fixed; bottom: 40px; left: 24px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff; width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 30px rgba(0, 242, 254, 0.4); cursor: pointer;
+  z-index: 1500; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+}
+.floating-cart-bubble:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 12px 35px rgba(0, 242, 254, 0.6); }
+.floating-cart-bubble svg { width: 24px; height: 24px; }
+.floating-cart-bubble .floating-badge {
+  position: absolute; top: -2px; left: -2px; background: #fff; color: #04091a;
+  font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.overlay-click {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); z-index: 900; display: none; backdrop-filter: blur(4px);
+}
+
+.nav-drawer {
+  position: fixed; top: 0; right: 0; width: 300px; height: 100%;
+  background: rgba(5, 12, 38, 0.98); backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(0, 242, 254, 0.2); z-index: 1000;
+  transform: translateX(100%); visibility: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+  display: flex; flex-direction: column; padding: 40px; will-change: transform;
+}
+.nav-drawer.open { transform: translateX(0); visibility: visible; }
+.drawer-close-area { display: flex; justify-content: flex-end; margin-bottom: 40px; }
+.btn-close-drawer { background: none; border: none; color: #fff; font-size: 32px; cursor: pointer; line-height: 1; }
+.nav-drawer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 28px; }
+.nav-drawer a { color: #fff; text-decoration: none; font-size: 19px; font-weight: 600; transition: color 0.3s, padding-left 0.3s; }
+.nav-drawer a:hover { color: var(--accent-cyan); padding-left: 8px; }
+
+/* Contact nav item style */
+.nav-contact-block {
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(0, 242, 254, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.nav-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.nav-contact-item:hover { color: var(--accent-cyan); }
+.nav-contact-item svg { flex-shrink: 0; }
+
+.cart-drawer {
+  position: fixed; top: 0; right: 0; width: 360px; max-width: 100%; height: 100%;
+  background: #070f2b; border-left: 2px solid var(--accent-cyan); z-index: 2500;
+  transform: translateX(100%); visibility: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+  display: flex; flex-direction: column; padding: 30px 24px;
+  box-shadow: -10px 0 40px rgba(0,0,0,0.6); will-change: transform;
+}
+.cart-drawer.open { transform: translateX(0); visibility: visible; }
+.cart-drawer-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;
+}
+.cart-drawer-header h3 { margin: 0; font-size: 20px; color: #fff; }
+.close-cart-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+.close-cart-btn:hover { color: #fff; }
+
+.cart-items-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+.cart-empty-msg { color: var(--text-muted); text-align: center; margin-top: 40px; font-style: italic; }
+.cart-item-row {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.cart-item-row h4 { color: #fff; }
+.cart-item-info h4 { margin: 0 0 4px 0; font-size: 14px; }
+.cart-item-info span { color: var(--accent-cyan); font-size: 12px; font-weight: bold; }
+.cart-item-remove { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 12px; }
+.cart-drawer-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+
+.toast-notification {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+  border: 1.5px solid var(--accent-cyan); color: #fff; padding: 14px 28px;
+  border-radius: 30px; font-weight: 600; font-size: 14.5px;
+  box-shadow: 0 10px 30px rgba(0, 242, 254, 0.3); z-index: 3000;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+  opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+}
+.toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+.cookie-blur-lock {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(4, 9, 26, 0.85); backdrop-filter: blur(12px);
+  z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
+}
+.cookie-square-box {
+  background: #0b1536; border: 2px solid var(--accent-cyan); width: 100%; max-width: 400px;
+  aspect-ratio: 1 / 1; border-radius: 16px; padding: 30px;
+  display: flex; flex-direction: column; justify-content: space-between; text-align: center;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 242, 254, 0.2); box-sizing: border-box; overflow: hidden;
+}
+@media (max-width: 440px) { .cookie-square-box { aspect-ratio: auto; min-height: 360px; } }
+.cookie-square-box h4 { margin: 0 0 10px 0; font-size: 20px; color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+.cookie-square-box p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.5; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+.cookie-square-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.cookie-square-actions button { width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-box-acc { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); border: none; color: #fff; }
+.btn-box-acc:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4); }
+.btn-box-ref { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #fff; }
+.btn-box-ref:hover { background: rgba(255,255,255,0.05); }
+
+.hero-section { padding: 100px 24px 70px; text-align: center; }
+.hero-tagline {
+  background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: var(--accent-cyan);
+  text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 2.5px; padding: 6px 16px;
+  border-radius: 30px; display: inline-block; margin-bottom: 25px; box-shadow: var(--shadow-glow);
+}
+.hero-section h1 {
+  font-size: clamp(26px, 7vw, 46px); font-weight: 800; line-height: 1.3; margin: 0 auto 24px;
+  max-width: 100%; letter-spacing: -1px; word-wrap: break-word;
+  background: linear-gradient(180deg, #ffffff 40%, #a2c4ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-section p { font-size: clamp(15px, 4vw, 18px); color: var(--text-muted); max-width: 650px; margin: 0 auto 40px; }
+
+.brand-slogan-divider { display: flex; align-items: center; justify-content: center; gap: 20px; max-width: 100%; margin: 30px auto 50px; }
+.brand-slogan-line { flex-grow: 1; height: 1px; background: linear-gradient(90deg, rgba(0,242,254,0) 0%, rgba(0,242,254,0.4) 50%, rgba(0,242,254,0) 100%); }
+.brand-slogan-text { font-size: clamp(11px, 3.5vw, 14px); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #fff; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); text-align: center; }
+
+.services-bar-section { max-width: 1140px; margin: 0 auto 60px; padding: 0 24px; }
+.services-bar-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
+  background: rgba(11, 21, 54, 0.5); border: 1px solid rgba(0, 242, 254, 0.15);
+  border-radius: 16px; padding: 24px; backdrop-filter: blur(10px);
+}
+.service-pillar-card { display: flex; align-items: center; gap: 15px; padding: 10px; }
+.service-pillar-icon {
+  width: 45px; height: 45px; background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-cyan);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: var(--accent-cyan); flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+.service-pillar-info h4 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: #fff; }
+.service-pillar-info p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); }
+
+.hero-buttons { display: flex; justify-content: center; gap: 20px; }
+.btn-premium {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); color: #fff;
+  padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14.5px;
+  box-shadow: 0 4px 20px rgba(0, 242, 254, 0.4); transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-premium:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 242, 254, 0.6); }
+
+.products-section { padding: 40px 24px 80px; max-width: 1140px; margin: 0 auto; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+.product-card {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.15); border-radius: 20px; padding: 28px;
+  display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
+}
+.product-card:hover { background: var(--bg-card-hover); border-color: var(--accent-cyan); transform: translateY(-6px); box-shadow: 0 15px 35px rgba(0, 242, 254, 0.15); }
+.product-image-container {
+  width: 100%; height: 180px; background: #04081c; border-radius: 14px; margin-bottom: 22px;
+  display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;
+}
+.product-image-container::before { content: ""; position: absolute; width: 80px; height: 80px; background: var(--accent-cyan); filter: blur(40px); opacity: 0.25; }
+.product-image-container span { font-size: 13px; color: var(--accent-cyan); font-weight: 600; z-index: 1; text-align: center; padding: 0 10px; }
+.product-card h3 { font-size: 21px; margin: 0 0 12px 0; }
+.product-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 26px; flex-grow: 1; }
+.product-actions { display: flex; gap: 12px; }
+.btn-specs-trigger {
+  background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;
+  padding: 11px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; flex: 1;
+}
+.btn-add-cart-prod {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); border: none; color: #fff;
+  padding: 11px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; flex: 1;
+}
+.specs-drawer { display: none; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 20px; padding-top: 14px; font-size: 13px; }
+.specs-drawer ul { margin: 0; padding: 0; list-style: none; }
+.specs-drawer li { display: flex; justify-content: space-between; padding: 5px 0; }
+.specs-drawer span { color: var(--text-muted); }
+.specs-drawer strong { color: var(--accent-cyan); }
+
+.section-white { 
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #030816;
+  padding: 80px 24px; border-radius: 40px 40px 0 0; margin-top: 40px;
+}
+.section-white-content { max-width: 900px; margin: 0 auto; }
+.section-white h2 { font-size: clamp(26px, 5vw, 34px); font-weight: 800; margin-bottom: 20px; color: #0f172a; }
+.section-white p { font-size: 18px; color: #334155; font-weight: 500; }
+
+.faq-section { padding: 80px 24px; max-width: 750px; margin: 0 auto; }
+.faq-section h2 { text-align: center; font-size: 28px; margin-bottom: 40px; color: #fff; }
+.faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 22px 0; }
+.faq-question { font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; font-size: 16px; color: var(--accent-cyan); }
+.faq-answer { color: var(--text-muted); margin-top: 10px; font-size: 14.5px; display: none; line-height: 1.6; }
+
+.reviews-section { padding: 80px 24px; background: linear-gradient(180deg, var(--bg-dark) 0%, #060d26 100%); }
+.reviews-inner { max-width: 1140px; margin: 0 auto; }
+.section-label-tag {
+  display: inline-block; background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3);
+  color: var(--accent-cyan); font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; padding: 5px 14px; border-radius: 30px; margin-bottom: 20px;
+}
+.reviews-title { font-size: clamp(24px, 5vw, 34px); font-weight: 800; color: #fff; margin: 0 0 12px 0; }
+.reviews-subtitle { color: var(--text-muted); font-size: 16px; margin: 0 0 50px 0; }
+.reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.review-card {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.1);
+  border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: border-color 0.3s, transform 0.3s;
+}
+.review-card:hover { border-color: rgba(0, 242, 254, 0.4); transform: translateY(-4px); }
+.review-stars { color: #f59e0b; font-size: 17px; letter-spacing: 2px; }
+.review-text { color: #cbd5e1; font-size: 14px; line-height: 1.7; margin: 0; flex-grow: 1; font-style: italic; }
+.review-author { display: flex; align-items: center; gap: 12px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; }
+.review-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.review-author strong { display: block; font-size: 14px; color: #fff; }
+.review-author span { font-size: 12px; color: var(--text-muted); }
+
+.expandable-section { padding: 60px 24px 80px; background: #060d26; border-top: 1px solid rgba(0, 242, 254, 0.08); }
+.expandable-inner { max-width: 860px; margin: 0 auto; }
+.expand-block {
+  border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; margin-bottom: 14px; overflow: hidden;
+  background: rgba(11, 21, 54, 0.6); transition: border-color 0.3s;
+}
+.expand-block:hover { border-color: rgba(0, 242, 254, 0.25); }
+.expand-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; cursor: pointer; gap: 16px; user-select: none; }
+.expand-header span { font-weight: 700; font-size: 15px; color: #fff; line-height: 1.4; }
+.expand-icon {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0, 242, 254, 0.4); color: var(--accent-cyan);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 300; flex-shrink: 0;
+  transition: background 0.3s, transform 0.3s; line-height: 1;
+}
+.expand-header.active .expand-icon { background: var(--accent-cyan); color: #04091a; transform: rotate(45deg); }
+.expand-body { display: none; padding: 0 24px 22px; border-top: 1px solid rgba(255,255,255,0.05); }
+.expand-body p { color: #94a3b8; font-size: 14px; line-height: 1.8; margin: 16px 0 0 0; }
+.expand-body p strong { color: var(--accent-cyan); }
+
+.product-img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; padding: 10px; }
+.promo-badge {
+  position: absolute; top: 14px; right: 14px; background: #ef4444; color: #fff;
+  font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; z-index: 2;
+  letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(239,68,68,0.4);
+}
+.promo-badge--gold { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 10px rgba(245,158,11,0.4); }
+.product-badge-premium {
+  display: inline-block; background: linear-gradient(135deg, rgba(0,242,254,0.15), rgba(0,102,255,0.15));
+  border: 1px solid rgba(0,242,254,0.4); color: var(--accent-cyan); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+}
+.product-card--premium { border-color: rgba(0, 242, 254, 0.3); background: linear-gradient(135deg, #0b1536 0%, #0d1a45 100%); }
+.price-block {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.price-old { font-size: 13px; color: var(--text-muted); text-decoration: line-through; }
+.price-new { font-size: 20px; font-weight: 800; color: var(--accent-cyan); }
+
+/* ============================
+   PANIER - TOTAL + BOUTON
+============================= */
+.cart-total-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; margin-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 15px; color: #fff;
+}
+.cart-total-line strong { font-size: 18px; color: var(--accent-cyan); }
+.btn-checkout-main {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff; border: none; width: 100%; padding: 15px; border-radius: 12px;
+  font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,242,254,0.3); transition: transform 0.2s;
+}
+.btn-checkout-main:hover { transform: translateY(-2px); }
+
+/* ============================
+   CHECKOUT MODAL
+============================= */
+.checkout-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(4, 9, 26, 0.92); backdrop-filter: blur(10px);
+  z-index: 5000; display: none; overflow-y: auto; padding: 0;
+}
+.checkout-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+.checkout-modal { background: #08112e; width: 100%; max-width: 600px; min-height: 100vh; padding: 0 0 60px 0; }
+.checkout-header {
+  position: sticky; top: 0; background: #08112e; padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 16px; z-index: 10;
+}
+.checkout-header h2 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
+.checkout-back {
+  background: none; border: none; color: var(--accent-cyan); cursor: pointer;
+  display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; padding: 6px 0; white-space: nowrap;
+}
+.checkout-body { padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+
+.checkout-recap {
+  background: rgba(0,242,254,0.05); border: 1px solid rgba(0,242,254,0.15);
+  border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.recap-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #cbd5e1; }
+.recap-item strong { color: #fff; }
+.recap-item span.recap-price { color: var(--accent-cyan); font-weight: 700; }
+
+.checkout-form-title {
+  font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 18px 0;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 13px; color: #cbd5e1; font-weight: 500; }
+.req { color: #ef4444; }
+.opt { color: var(--text-muted); font-size: 11px; }
+.form-group input, .form-group select {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 12px 14px; color: #fff; font-size: 14px; outline: none;
+  transition: border-color 0.2s; width: 100%;
+}
+.form-group select { appearance: none; cursor: pointer; }
+.form-group select option { background: #08112e; color: #fff; }
+.form-group input:focus, .form-group select:focus { border-color: var(--accent-cyan); }
+.form-group input::placeholder { color: #475569; }
+.form-static-val {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: 12px 14px; color: #fff; font-size: 14px; font-weight: 600;
+}
+
+.payment-option {
+  display: block; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+  padding: 16px; cursor: pointer; transition: border-color 0.2s; margin-bottom: 10px;
+}
+.payment-option input[type="radio"] { display: none; }
+.payment-option--selected { border-color: var(--accent-cyan); background: rgba(0,242,254,0.04); }
+.payment-option-inner { display: flex; align-items: flex-start; gap: 12px; }
+.payment-radio-dot {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent-cyan);
+  flex-shrink: 0; margin-top: 2px; background: radial-gradient(circle, var(--accent-cyan) 40%, transparent 40%);
+}
+.payment-option-inner strong { color: #fff; font-size: 14px; display: block; margin-bottom: 4px; }
+.payment-option-inner p { margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+.bank-details-box {
+  background: rgba(0, 102, 255, 0.06); border: 1px solid rgba(0, 102, 255, 0.25);
+  border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+}
+.bank-detail-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; }
+.bank-detail-row span { color: var(--text-muted); flex-shrink: 0; }
+.bank-detail-row strong { color: #fff; text-align: right; word-break: break-all; }
+
+/* Livraison */
+.shipping-info-box {
+  background: rgba(0, 242, 254, 0.04);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.shipping-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px;
+}
+.shipping-info-row span { color: var(--text-muted); }
+.shipping-info-row strong { color: #fff; }
+.shipping-free { color: #22c55e !important; font-weight: 700; }
+.shipping-paid { color: var(--accent-cyan) !important; font-weight: 700; }
+
+.checkout-total-box {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+}
+.checkout-total-row { display: flex; justify-content: space-between; font-size: 14px; color: #cbd5e1; }
+.checkout-total-row--main { font-size: 17px; color: #fff; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; }
+.checkout-total-row--main strong { color: var(--accent-cyan); font-size: 20px; }
+
+.cgv-label {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: #94a3b8; cursor: pointer; line-height: 1.5;
+}
+.cgv-label input { margin-top: 2px; accent-color: var(--accent-cyan); flex-shrink: 0; }
+
+.checkout-email-notice {
+  background: rgba(0,242,254,0.05); border: 1px solid rgba(0,242,254,0.2);
+  border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #94a3b8;
+  display: flex; gap: 10px; align-items: flex-start; line-height: 1.6;
+}
+.checkout-email-notice svg { flex-shrink: 0; margin-top: 2px; stroke: var(--accent-cyan); }
+.checkout-email-notice strong { color: var(--accent-cyan); }
+
+/* ============================
+   CARD PAYMENT SECTION
+   (hidden initially, shown after "Passer la commande")
+============================= */
+#cardPaymentSection { display: none; }
+
+.card-payment-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(4, 9, 26, 0.95); backdrop-filter: blur(12px);
+  z-index: 7000; display: none; overflow-y: auto; padding: 0;
+}
+.card-payment-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+.card-payment-modal {
+  background: #08112e; width: 100%; max-width: 500px; min-height: 100vh; padding: 0 0 60px 0;
+}
+.card-payment-header {
+  position: sticky; top: 0; background: #08112e; padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 16px; z-index: 10;
+}
+.card-payment-header h2 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
+.card-payment-body { padding: 28px 24px; display: flex; flex-direction: column; gap: 22px; }
+
+.card-field-group { display: flex; flex-direction: column; gap: 8px; }
+.card-field-group label { font-size: 13px; color: #cbd5e1; font-weight: 500; }
+.card-field-group input {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 14px 16px; color: #fff; font-size: 15px; outline: none;
+  transition: border-color 0.2s; width: 100%; letter-spacing: 0.5px;
+}
+.card-field-group input:focus { border-color: var(--accent-cyan); }
+.card-field-group input::placeholder { color: #475569; font-size: 14px; }
+
+.card-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.card-icons { display: flex; gap: 10px; margin-bottom: 4px; }
+.card-icon-badge {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: #fff;
+}
+
+.secure-badge {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #86efac;
+}
+.secure-badge svg { flex-shrink: 0; }
+
+.btn-pay-card {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff; border: none; width: 100%; padding: 17px; border-radius: 12px;
+  font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 6px 25px rgba(0,242,254,0.35); transition: transform 0.2s;
+}
+.btn-pay-card:hover { transform: translateY(-2px); }
+
+.btn-place-order {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff; border: none; width: 100%; padding: 16px; border-radius: 12px;
+  font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 6px 25px rgba(0,242,254,0.35); transition: transform 0.2s;
+}
+.btn-place-order:hover { transform: translateY(-2px); }
+
+.confirm-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(4,9,26,0.92); backdrop-filter: blur(12px);
+  z-index: 9999; display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.confirm-overlay.open { display: flex; }
+.confirm-box {
+  background: #0b1536; border: 2px solid var(--accent-cyan); border-radius: 20px;
+  padding: 40px 30px; max-width: 450px; width: 100%; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0,242,254,0.15);
+}
+.confirm-icon {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; color: #04091a; margin: 0 auto 20px;
+}
+.confirm-box h3 { color: #fff; font-size: 22px; margin: 0 0 12px; }
+.confirm-box p { color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
+.confirm-email {
+  background: rgba(0,242,254,0.08); border: 1px solid rgba(0,242,254,0.3);
+  border-radius: 8px; padding: 10px 16px; color: var(--accent-cyan); font-weight: 700; font-size: 14px; margin-bottom: 16px;
+}
+.btn-confirm-close {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #fff; border: none; padding: 12px 30px; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+}
+.btn-download-invoice {
+  background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+  padding: 11px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; margin-top: 8px; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center;
+  transition: background 0.2s;
+}
+.btn-download-invoice:hover { background: rgba(0,242,254,0.08); }
+
+@media (max-width: 480px) {
+  .form-row-2, .card-row-2 { grid-template-columns: 1fr; }
+  .bank-detail-row { flex-direction: column; align-items: flex-start; }
+  .bank-detail-row strong { text-align: left; }
+}
+
+footer { background: #02040c; padding: 50px 24px; color: #475569; font-size: 12px; text-align: center; border-top: 1px solid rgba(0, 242, 254, 0.1); }
+footer a { color: var(--accent-cyan); text-decoration: none; }
+
+@media (max-width: 768px) {
+  header { padding: 15px 20px; }
+  .logo-title { font-size: 20px; }
+  .logo-subtitle { font-size: 8px; letter-spacing: 1.2px; }
+  .brand-slogan-line { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="overlay-click" id="globalOverlay" onclick="closeAllDrawers()"></div>
+
+<div class="floating-cart-bubble" id="floatingCartBtn" onclick="toggleCart()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+    <span class="floating-badge" id="floatingCartBadgeCount">0</span>
+</div>
+
+<div class="toast-notification" id="cartToast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span>Produit ajouté au panier !</span>
+</div>
+
+<div class="cookie-blur-lock" id="cookieScreenLock">
+    <div class="cookie-square-box">
+        <h4>Confidentialité</h4>
+        <p>CLIMAREON déploie des traceurs technologiques discrets pour perfectionner la fluidité de votre navigation.</p>
+        <div class="cookie-square-actions">
+            <button class="btn-box-acc" onclick="acceptPrivacy()">Accepter</button>
+            <button class="btn-box-ref" onclick="acceptPrivacy()">Refuser</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <a href="#" class="logo-container">
+        <svg viewBox="0 0 130 130" width="52" height="52" style="margin-right: 12px;">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00f2fe" />
+              <stop offset="40%" stop-color="#0066ff" />
+              <stop offset="100%" stop-color="#020718" />
+            </linearGradient>
+            <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0055ff" />
+              <stop offset="50%" stop-color="#00d2ff" />
+              <stop offset="100%" stop-color="#00f2fe" />
+            </linearGradient>
+          </defs>
+          <path d="M 75 12 A 48 48 0 1 0 115 80 A 38 38 0 1 1 68 24 A 48 48 0 0 0 75 12 Z" fill="url(#logoGrad)" />
+          <path d="M 50 32 H 82 C 95 32 102 40 102 52 C 102 63 94 70 82 70 H 64 V 98 H 50 Z M 64 45 V 57 H 80 C 85 57 88 55 88 51 C 88 47 85 45 80 45 Z" fill="#182344" />
+          <path d="M 78 70 L 102 98 H 84 L 64 70 Z" fill="#1e2d5a" />
+          <g stroke="#00f2fe" stroke-width="2.2" stroke-linecap="round" transform="translate(64, 51) scale(0.65)">
+            <line x1="0" y1="-18" x2="0" y2="18" />
+            <line x1="-18" y1="0" x2="18" y2="0" />
+            <line x1="-13" y1="-13" x2="13" y2="13" />
+            <line x1="-13" y1="13" x2="13" y2="-13" />
+          </g>
+          <path d="M 40 94 Q 62 82 85 94 T 125 92" fill="none" stroke="url(#waveGrad)" stroke-width="3.5" stroke-linecap="round" />
+        </svg>
+        <div class="logo-text-group">
+            <span class="logo-title">CLIMAREON</span>
+            <span class="logo-subtitle">Expert en Climatisation</span>
+        </div>
+    </a>
+
+    <div class="header-actions">
+        <div class="cart-icon-wrapper" onclick="toggleCart()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="cart-badge" id="cartBadgeCount">0</span>
+        </div>
+        <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">
+            <span></span><span style="margin: 4px 0;"></span><span></span>
+        </button>
+    </div>
+</header>
+
+<nav class="nav-drawer" id="navDrawer">
+    <div class="drawer-close-area">
+        <button class="btn-close-drawer" onclick="toggleMenu()">&times;</button>
+    </div>
+    <ul>
+        <li><a href="#modeles" onclick="toggleMenu()">Nos Modèles</a></li>
+        <li><a href="#technologie" onclick="toggleMenu()">Technologie</a></li>
+        <li><a href="#faq" onclick="toggleMenu()">FAQ</a></li>
+        <li><a href="#contact" onclick="toggleMenu()">Contact</a></li>
+    </ul>
+    <div class="nav-contact-block">
+        <a href="tel:+330757750303" class="nav-contact-item">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +33 07 57 75 03 03
+        </a>
+        <a href="mailto:Globalefinance@outlook.com" class="nav-contact-item">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Globalefinance@outlook.com
+        </a>
+    </div>
+</nav>
+
+<!-- PANIER -->
+<div class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+        <h3>Votre Panier d'Achat</h3>
+        <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items-container" id="cartItemsList">
+        <div class="cart-empty-msg">Votre panier est actuellement vide.</div>
+    </div>
+    <div class="cart-drawer-footer">
+        <div class="cart-total-line" id="cartTotalLine" style="display:none;">
+            <span>Total TTC</span>
+            <strong id="cartTotalAmount">0,00 €</strong>
+        </div>
+        <button class="btn-checkout-main" onclick="openCheckout()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Valider mon panier
+        </button>
+    </div>
+</div>
+
+<div class="hero-section">
+    <span class="hero-tagline">Édition Limitée 2026</span>
+    <h1>L'art du climat absolu.<br>Le silence architectural.</h1>
+    <p>Une symbiose parfaite entre épuration visuelle et ingénierie aéraulique invisible pour vos espaces d'exception.</p>
+    <div class="brand-slogan-divider">
+        <div class="brand-slogan-line"></div>
+        <div class="brand-slogan-text">Votre confort, notre priorité</div>
+        <div class="brand-slogan-line"></div>
+    </div>
+    <div class="hero-buttons">
+        <a href="#modeles" class="btn-premium">Découvrir les Nouveautés</a>
+    </div>
+</div>
+
+<div class="services-bar-section">
+    <div class="services-bar-grid">
+        <div class="service-pillar-card">
+            <div class="service-pillar-icon">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="service-pillar-info"><h4>Vente</h4><p>Premium</p></div>
+        </div>
+        <div class="service-pillar-card">
+            <div class="service-pillar-icon">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22V12M12 12L7 17M12 12l5 5M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"/></svg>
+            </div>
+            <div class="service-pillar-info"><h4>Installation</h4><p>Sur-mesure</p></div>
+        </div>
+        <div class="service-pillar-card">
+            <div class="service-pillar-icon">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="service-pillar-info"><h4>Maintenance</h4><p>Suivi dédié</p></div>
+        </div>
+        <div class="service-pillar-card">
+            <div class="service-pillar-icon">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 11l2 2 4-4"/></svg>
+            </div>
+            <div class="service-pillar-info"><h4>Dépannage</h4><p>24h/7j</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="products-section" id="modeles">
+    <div class="products-grid">
+
+        <div class="product-card">
+            <div class="promo-badge">-10%</div>
+            <div class="product-image-container">
+                <img src="image1.jpg" alt="Elsay 12000 BTU" class="product-img">
+            </div>
+            <h3>Elsay 12 000 BTU</h3>
+            <p class="product-desc">Climatiseur mobile réversible pour pièces de 25 à 35 m². Froid & chaud, déshumidification, télécommande, écran LCD. Gaz R290 – Classe A.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-1')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('Elsay 12 000 BTU', 224.10)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">249,00 €</span><span class="price-new">224,10 €</span></div>
+            <div class="specs-drawer" id="specs-1">
+                <ul>
+                    <li><span>Puissance :</span><strong>3 600 W / 12 000 BTU</strong></li>
+                    <li><span>Surface :</span><strong>25 à 35 m²</strong></li>
+                    <li><span>Débit d'air :</span><strong>400 m³/h</strong></li>
+                    <li><span>Déshumidification :</span><strong>19 L/jour</strong></li>
+                    <li><span>Vitesses :</span><strong>3 vitesses</strong></li>
+                    <li><span>Minuteur :</span><strong>24 h</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R290</strong></li>
+                    <li><span>Classe énergie :</span><strong>A</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="promo-badge">-10%</div>
+            <div class="product-image-container">
+                <img src="image2.jpg" alt="Beko BS207C" class="product-img">
+            </div>
+            <h3>Beko BS207C – 12 000 BTU</h3>
+            <p class="product-desc">Climatiseur mobile pour 30 à 35 m². Refroidissement, ventilation, déshumidification. Affichage numérique, télécommande, minuteur 24 h. Gaz R290 – Classe A.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-2')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('Beko BS207C 12 000 BTU', 224.99)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">249,99 €</span><span class="price-new">224,99 €</span></div>
+            <div class="specs-drawer" id="specs-2">
+                <ul>
+                    <li><span>Puissance :</span><strong>12 000 BTU</strong></li>
+                    <li><span>Surface :</span><strong>30 à 35 m²</strong></li>
+                    <li><span>Fonctions :</span><strong>Froid / Ventil / Déshum</strong></li>
+                    <li><span>Minuteur :</span><strong>24 h</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R290</strong></li>
+                    <li><span>Classe énergie :</span><strong>A</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="promo-badge">-10%</div>
+            <div class="product-image-container">
+                <img src="image3.jpg" alt="Vedette V12KR2H" class="product-img">
+            </div>
+            <h3>Vedette V12KR2H – 12 000 BTU</h3>
+            <p class="product-desc">Climatiseur mobile réversible froid & chaud jusqu'à 35 m². Mode auto, ventilation, déshumidification, télécommande, programmation 24 h. R290 – Classe A.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-3')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('Vedette V12KR2H 12 000 BTU', 314.99)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">349,99 €</span><span class="price-new">314,99 €</span></div>
+            <div class="specs-drawer" id="specs-3">
+                <ul>
+                    <li><span>Type :</span><strong>Réversible (froid + chaud)</strong></li>
+                    <li><span>Surface :</span><strong>jusqu'à 35 m²</strong></li>
+                    <li><span>Fonctions :</span><strong>Auto / Ventil / Déshum</strong></li>
+                    <li><span>Programmation :</span><strong>24 h</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R290</strong></li>
+                    <li><span>Classe énergie :</span><strong>A</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="promo-badge">-10%</div>
+            <div class="product-image-container">
+                <img src="image4.jpg" alt="Oceanic Monobloc 12000 BTU" class="product-img">
+            </div>
+            <h3>Oceanic Monobloc – 12 000 BTU</h3>
+            <p class="product-desc">Climatisation, chauffage, ventilation et déshumidification pour 35 m². 3 530 W, écran numérique, télécommande, minuteur. Gaz R290 – Classe A.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-4')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('Oceanic Monobloc 12 000 BTU', 349.83)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">388,70 €</span><span class="price-new">349,83 €</span></div>
+            <div class="specs-drawer" id="specs-4">
+                <ul>
+                    <li><span>Puissance :</span><strong>3 530 W / 12 000 BTU</strong></li>
+                    <li><span>Surface :</span><strong>jusqu'à 35 m²</strong></li>
+                    <li><span>Fonctions :</span><strong>Froid / Chaud / Ventil / Déshum</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R290</strong></li>
+                    <li><span>Classe énergie :</span><strong>A</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="product-card product-card--premium">
+            <div class="promo-badge promo-badge--gold">-20%</div>
+            <div class="product-badge-premium">Haut de gamme</div>
+            <div class="product-image-container">
+                <img src="image5.jpg" alt="De Longhi Pinguino PAC EL112" class="product-img">
+            </div>
+            <h3>De'Longhi Pinguino PAC EL112 Wi-Fi</h3>
+            <p class="product-desc">Haut de gamme. Cool Surround, Wi-Fi smartphone, jusqu'à 40 m². Mode nuit, filtre lavable, télécommande intelligente. R290 – Classe A+.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-5')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('De\'Longhi Pinguino PAC EL112 Wi-Fi', 639.20)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">799,00 €</span><span class="price-new">639,20 €</span></div>
+            <div class="specs-drawer" id="specs-5">
+                <ul>
+                    <li><span>Puissance :</span><strong>12 000 BTU</strong></li>
+                    <li><span>Surface :</span><strong>jusqu'à 40 m²</strong></li>
+                    <li><span>Connectivité :</span><strong>Wi-Fi / Smartphone</strong></li>
+                    <li><span>Technologie :</span><strong>Cool Surround</strong></li>
+                    <li><span>Sonore :</span><strong>47–50 dB</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R290</strong></li>
+                    <li><span>Classe énergie :</span><strong>A+</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="product-card product-card--premium">
+            <div class="promo-badge promo-badge--gold">-20%</div>
+            <div class="product-badge-premium">Ultra haut de gamme</div>
+            <div class="product-image-container">
+                <img src="image6.jpg" alt="Midea PortaSplit Inverter" class="product-img">
+            </div>
+            <h3>Midea PortaSplit Inverter – 12 000 BTU</h3>
+            <p class="product-desc">Split mobile nouvelle génération. Inverter, 3,5 kW, jusqu'à 42 m², Wi-Fi, mode nuit ultra-silencieux 39–42 dB. Gaz R32 – très haute efficacité.</p>
+            <div class="product-actions">
+                <button class="btn-specs-trigger" onclick="toggleSpecs('specs-6')">Détails</button>
+                <button class="btn-add-cart-prod" onclick="addItemToCart('Midea PortaSplit Inverter 12 000 BTU', 1039.20)">Ajouter au panier</button>
+            </div>
+            <div class="price-block"><span class="price-old">1 299,00 €</span><span class="price-new">1 039,20 €</span></div>
+            <div class="specs-drawer" id="specs-6">
+                <ul>
+                    <li><span>Puissance :</span><strong>3,5 kW / 12 000 BTU</strong></li>
+                    <li><span>Surface :</span><strong>jusqu'à 42 m²</strong></li>
+                    <li><span>Technologie :</span><strong>Inverter DC</strong></li>
+                    <li><span>Connectivité :</span><strong>Wi-Fi / Smartphone</strong></li>
+                    <li><span>Sonore :</span><strong>39–42 dB</strong></li>
+                    <li><span>Réfrigérant :</span><strong>R32</strong></li>
+                    <li><span>Type :</span><strong>Split (int. + ext. séparées)</strong></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="section-white" id="technologie">
+    <div class="section-white-content">
+        <h2>Une conception invisible au cœur de l'habitat moderne</h2>
+        <p>Ajustements millimétriques et absorption dynamique des ondes sonores. Nos écosystèmes redéfinissent l'atmosphère de vos intérieurs sans jamais heurter vos choix architecturaux majeurs.</p>
+    </div>
+</div>
+
+<div class="reviews-section" id="avis">
+    <div class="reviews-inner">
+        <div class="section-label-tag">Témoignages</div>
+        <h2 class="reviews-title">Ce que disent nos clients</h2>
+        <p class="reviews-subtitle">Plus de 1 200 installations réalisées en France. Voici quelques retours d'expérience.</p>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Installation impeccable en moins de 3 heures. Le technicien était ponctuel, propre et extrêmement professionnel. Le Pure Nano est totalement silencieux, on ne l'entend même pas la nuit."</p>
+                <div class="review-author"><div class="review-avatar">ML</div><div><strong>Marie-Laure D.</strong><span>Aix-en-Provence · Pure Nano</span></div></div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"J'avais des doutes sur le prix mais après 2 étés, je comprends la différence. Ma facture EDF a baissé de 22% et la température reste parfaitement stable dans tout le salon."</p>
+                <div class="review-author"><div class="review-avatar">JB</div><div><strong>Jean-Baptiste M.</strong><span>Lyon 6e · Aero Prime</span></div></div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Le service après-vente est exceptionnel. Appel à 21h un dimanche, technicien présent le lendemain matin. Problème résolu en 40 minutes."</p>
+                <div class="review-author"><div class="review-avatar">SC</div><div><strong>Sophie C.</strong><span>Bordeaux · Magna Ultra</span></div></div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"On a équipé notre villa complète avec 4 unités Aero Prime. Le résultat est bluffant, aucun bruit, une esthétique parfaite. Je recommande sans hésitation."</p>
+                <div class="review-author"><div class="review-avatar">PR</div><div><strong>Philippe R.</strong><span>Nice · 4× Aero Prime</span></div></div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Après avoir essayé trois autres marques en dix ans, CLIMAREON est clairement dans une autre catégorie. La précision du thermostat est redoutable, au dixième de degré."</p>
+                <div class="review-author"><div class="review-avatar">EL</div><div><strong>Éric L.</strong><span>Paris 16e · Pure Nano</span></div></div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★☆</div>
+                <p class="review-text">"Très bonne expérience globale. Le délai d'installation était un peu long, mais ça valait l'attente. L'unité extérieure est quasiment inaudible depuis le jardin."</p>
+                <div class="review-author"><div class="review-avatar">AC</div><div><strong>Anne-Claire V.</strong><span>Nantes · Aero Prime</span></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="faq-section" id="faq">
+    <h2>Foire Aux Questions</h2>
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Quelle est la durée de la garantie constructeur ? <span>+</span></div>
+        <div class="faq-answer">Nos compresseurs profitent d'une extension de garantie de 5 ans pièces et main d'œuvre. Cette garantie est valable à compter de la date d'installation officielle effectuée par un technicien CLIMAREON certifié.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Quels sont les délais d'installation après commande ? <span>+</span></div>
+        <div class="faq-answer">En règle générale, le délai entre la validation de votre commande et l'installation effective est de 7 à 14 jours ouvrés. Un conseiller vous contactera dans les 48h suivant votre commande.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Les climatiseurs CLIMAREON fonctionnent-ils aussi en chauffage ? <span>+</span></div>
+        <div class="faq-answer">Oui, l'intégralité de notre gamme est équipée de la technologie pompe à chaleur réversible, avec des coefficients de performance (COP) allant jusqu'à 4,8.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Est-il possible de contrôler mon système à distance ? <span>+</span></div>
+        <div class="faq-answer">Absolument. Tous nos modèles sont compatibles Wi-Fi et intègrent nativement l'application mobile CLIMAREON Connect, disponible gratuitement sur iOS et Android.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">Quels sont les frais de livraison ? <span>+</span></div>
+        <div class="faq-answer">La livraison est <strong>offerte en Europe</strong>. Pour toute livraison hors Europe, des frais de 20 € s'appliquent. Ces frais sont calculés automatiquement lors de la commande selon votre pays de destination.</div>
+    </div>
+</div>
+
+<div class="expandable-section">
+    <div class="expandable-inner">
+        <div class="section-label-tag" style="margin-bottom: 30px;">Tout savoir sur CLIMAREON</div>
+        <div class="expand-block">
+            <div class="expand-header" onclick="toggleExpand(this)">
+                <span>À propos de CLIMAREON — Notre histoire et nos engagements</span>
+                <div class="expand-icon">+</div>
+            </div>
+            <div class="expand-body">
+                <p>CLIMAREON est née en 2011 d'une conviction simple : le confort thermique ne devrait jamais être un compromis esthétique. Aujourd'hui, l'entreprise emploie 87 collaborateurs répartis sur 6 agences régionales en France.</p>
+            </div>
+        </div>
+        <div class="expand-block">
+            <div class="expand-header" onclick="toggleExpand(this)">
+                <span>La technologie Inverter DC — Comment ça fonctionne vraiment</span>
+                <div class="expand-icon">+</div>
+            </div>
+            <div class="expand-body">
+                <p>Avec l'Inverter DC, le compresseur adapte continuellement sa vitesse de rotation à la demande réelle. La température reste stable à ±0,5°C de la consigne, la consommation électrique est réduite de 30 à 40%.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTACT SECTION -->
+<div id="contact" style="background:#060d26; padding: 80px 24px; border-top: 1px solid rgba(0,242,254,0.08);">
+    <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+        <div class="section-label-tag">Contact</div>
+        <h2 style="font-size: clamp(24px,5vw,32px); font-weight:800; color:#fff; margin: 16px 0 12px;">Nous contacter</h2>
+        <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 40px;">Notre équipe est disponible pour répondre à toutes vos questions.635 Rue Pierre et Marie Curie
+73490 La Ravoire, France. </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            <a href="tel:+330757750303" style="display:flex; align-items:center; gap:14px; background: var(--bg-card); border: 1px solid rgba(0,242,254,0.15); border-radius:14px; padding: 20px 28px; text-decoration:none; transition: border-color 0.3s, transform 0.3s; flex: 1; min-width: 240px;" onmouseover="this.style.borderColor='var(--accent-cyan)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(0,242,254,0.15)';this.style.transform='none'">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div style="text-align:left;">
+                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Téléphone</div>
+                    <div style="font-size:16px;font-weight:700;color:#fff;">+33 07 57 75 03 03</div>
+                </div>
+            </a>
+            <a href="mailto:Globalefinance@outlook.com" style="display:flex; align-items:center; gap:14px; background: var(--bg-card); border: 1px solid rgba(0,242,254,0.15); border-radius:14px; padding: 20px 28px; text-decoration:none; transition: border-color 0.3s, transform 0.3s; flex: 1; min-width: 240px;" onmouseover="this.style.borderColor='var(--accent-cyan)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(0,242,254,0.15)';this.style.transform='none'">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
+                <div style="text-align:left;">
+                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Email</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff;">Globalefinance@outlook.com</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 CLIMAREON Inc. – Expert en climatisation – Votre confort, notre priorité.</p>
+    <p style="margin-top:8px;"><a href="tel:+330757750303">+33 07 57 75 03 03</a> &nbsp;|&nbsp; <a href="mailto:Globalefinance@outlook.com">Globalefinance@outlook.com</a></p>
+</footer>
+
+<!-- ============================
+     PAGE CHECKOUT / FACTURATION
+============================= -->
+<div class="checkout-overlay" id="checkoutOverlay">
+    <div class="checkout-modal" id="checkoutModal">
+        <div class="checkout-header">
+            <button class="checkout-back" onclick="closeCheckout()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Retour
+            </button>
+            <h2>Détails de facturation</h2>
+        </div>
+
+        <div class="checkout-body">
+
+            <!-- Récapitulatif commande -->
+            <div class="checkout-recap" id="checkoutRecap"></div>
+
+            <!-- Formulaire -->
+            <div class="checkout-form-section">
+                <h3 class="checkout-form-title">Vos informations</h3>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Prénom <span class="req">*</span></label>
+                        <input type="text" id="cf-prenom" placeholder="Votre prénom">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom <span class="req">*</span></label>
+                        <input type="text" id="cf-nom" placeholder="Votre nom">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom de l'entreprise <span class="opt">(facultatif)</span></label>
+                    <input type="text" id="cf-entreprise" placeholder="Entreprise">
+                </div>
+
+                <div class="form-group">
+                    <label>Pays / Région <span class="req">*</span></label>
+                    <select id="cf-pays" onchange="updateShipping()">
+                        <optgroup label="🌍 Europe (livraison gratuite)">
+                            <option value="FR" data-europe="true">🇫🇷 France</option>
+                            <option value="BE" data-europe="true">🇧🇪 Belgique</option>
+                            <option value="CH" data-europe="true">🇨🇭 Suisse</option>
+                            <option value="LU" data-europe="true">🇱🇺 Luxembourg</option>
+                            <option value="DE" data-europe="true">🇩🇪 Allemagne</option>
+                            <option value="ES" data-europe="true">🇪🇸 Espagne</option>
+                            <option value="IT" data-europe="true">🇮🇹 Italie</option>
+                            <option value="PT" data-europe="true">🇵🇹 Portugal</option>
+                            <option value="NL" data-europe="true">🇳🇱 Pays-Bas</option>
+                            <option value="AT" data-europe="true">🇦🇹 Autriche</option>
+                            <option value="PL" data-europe="true">🇵🇱 Pologne</option>
+                            <option value="SE" data-europe="true">🇸🇪 Suède</option>
+                            <option value="DK" data-europe="true">🇩🇰 Danemark</option>
+                            <option value="FI" data-europe="true">🇫🇮 Finlande</option>
+                            <option value="IE" data-europe="true">🇮🇪 Irlande</option>
+                            <option value="GR" data-europe="true">🇬🇷 Grèce</option>
+                            <option value="CZ" data-europe="true">🇨🇿 République tchèque</option>
+                            <option value="RO" data-europe="true">🇷🇴 Roumanie</option>
+                            <option value="HU" data-europe="true">🇭🇺 Hongrie</option>
+                            <option value="NO" data-europe="true">🇳🇴 Norvège</option>
+                        </optgroup>
+                        <optgroup label="🌐 Hors Europe (+ 20,00 €)">
+                            <option value="MA" data-europe="false">🇲🇦 Maroc</option>
+                            <option value="DZ" data-europe="false">🇩🇿 Algérie</option>
+                            <option value="TN" data-europe="false">🇹🇳 Tunisie</option>
+                            <option value="SN" data-europe="false">🇸🇳 Sénégal</option>
+                            <option value="CI" data-europe="false">🇨🇮 Côte d'Ivoire</option>
+                            <option value="CM" data-europe="false">🇨🇲 Cameroun</option>
+                            <option value="US" data-europe="false">🇺🇸 États-Unis</option>
+                            <option value="CA" data-europe="false">🇨🇦 Canada</option>
+                            <option value="BR" data-europe="false">🇧🇷 Brésil</option>
+                            <option value="AU" data-europe="false">🇦🇺 Australie</option>
+                            <option value="JP" data-europe="false">🇯🇵 Japon</option>
+                            <option value="OTHER" data-europe="false">Autre pays</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Numéro et nom de rue <span class="req">*</span></label>
+                    <input type="text" id="cf-rue" placeholder="Numéro de voie et nom de la rue">
+                    <input type="text" id="cf-rue2" placeholder="Bâtiment, appartement, lot, etc. (facultatif)" style="margin-top:8px;">
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Code postal <span class="req">*</span></label>
+                        <input type="text" id="cf-cp" placeholder="75000">
+                    </div>
+                    <div class="form-group">
+                        <label>Ville <span class="req">*</span></label>
+                        <input type="text" id="cf-ville" placeholder="Paris">
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Téléphone <span class="req">*</span></label>
+                        <input type="tel" id="cf-tel" placeholder="+33 6 00 00 00 00">
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span class="req">*</span></label>
+                        <input type="email" id="cf-email" placeholder="vous@email.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Livraison -->
+            <div class="shipping-info-box">
+                <h3 class="checkout-form-title" style="margin:0 0 14px 0;">Livraison</h3>
+                <div class="shipping-info-row">
+                    <span>Zone de livraison</span>
+                    <strong id="shippingZone">Europe</strong>
+                </div>
+                <div class="shipping-info-row">
+                    <span>Frais de livraison</span>
+                    <strong id="shippingCost" class="shipping-free">Gratuit</strong>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
+                    🌍 Livraison gratuite en Europe · 20,00 € hors Europe
+                </div>
+            </div>
+
+            <!-- Paiement -->
+            <div class="checkout-payment-section">
+                <h3 class="checkout-form-title">Mode de paiement</h3>
+
+                <label class="payment-option payment-option--selected">
+                    <input type="radio" name="payment" value="virement" checked>
+                    <div class="payment-option-inner">
+                        <div class="payment-radio-dot"></div>
+                        <div>
+                            <strong>Payer par Virement bancaire</strong>
+                            <p>Effectuez votre paiement directement sur notre compte bancaire. Votre commande sera traitée dès réception du virement.</p>
+                        </div>
+                    </div>
+                </label>
+
+                <div class="bank-details-box">
+                    <div class="bank-detail-row">
+                        <span>Bénéficiaire</span>
+                        <strong>LAURENA DOSSANTOS PEREIRA</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>IBAN</span>
+                        <strong>FR76 1723 8000 0100 4292 1011 975</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>BIC</span>
+                        <strong>SCSYFRP2</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>Référence</span>
+                        <strong id="orderRef">CLIM-2026-XXXX</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div class="checkout-total-box">
+                <div class="checkout-total-row">
+                    <span>Sous-total HT</span>
+                    <span id="checkoutSubtotal">0,00 €</span>
+                </div>
+                <div class="checkout-total-row">
+                    <span>TVA (20%)</span>
+                    <span id="checkoutTVA">0,00 €</span>
+                </div>
+                <div class="checkout-total-row">
+                    <span>Livraison</span>
+                    <span id="checkoutShipping">Gratuit</span>
+                </div>
+                <div class="checkout-total-row checkout-total-row--main">
+                    <span>Total TTC</span>
+                    <strong id="checkoutTotal">0,00 €</strong>
+                </div>
+            </div>
+
+            <!-- CGV -->
+            <label class="cgv-label">
+                <input type="checkbox" id="cgvCheck">
+                <span>J'ai lu et j'accepte les <a href="#" style="color:var(--accent-cyan);">conditions générales</a> et la <a href="#" style="color:var(--accent-cyan);">politique de confidentialité</a>. <span class="req">*</span></span>
+            </label>
+
+            <!-- Info email -->
+            <div class="checkout-email-notice">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Après validation, envoyez votre confirmation de virement à <strong>Globalefinance@outlook.com</strong> en mentionnant votre référence commande.
+            </div>
+
+            <button class="btn-place-order" onclick="placeOrder()">
+                ✓ &nbsp; Passer la commande
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================
+     PAGE INFORMATIONS DE CARTE
+     (affichée APRÈS "Passer la commande")
+============================= -->
+<div class="card-payment-overlay" id="cardPaymentOverlay">
+    <div class="card-payment-modal">
+        <div class="card-payment-header">
+            <button class="checkout-back" onclick="closeCardPayment()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Retour
+            </button>
+            <h2>Informations de carte</h2>
+        </div>
+        <div class="card-payment-body">
+
+            <div class="secure-badge">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 11l2 2 4-4"/></svg>
+                Paiement 100% sécurisé — informations supplémentaires 
+            </div>
+
+            <div>
+    </div>
+
+                
+                <div class="bank-details-box">
+                    <div class="bank-detail-row">
+                        <span>Bénéficiaire</span>
+                        <strong>LAURENA DOSSANTOS PEREIRA</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>IBAN</span>
+                        <strong>FR76 1723 8000 0100 4292 1011 975</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>BIC</span>
+                        <strong>SCSYFRP2</strong>
+                    </div>
+                    <div class="bank-detail-row">
+                        <span>Référence</span>
+                        <strong id="orderRef">CLIM-2026-XXXX</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Récap montant -->
+            <div style="background:rgba(0,242,254,0.05);border:1px solid rgba(0,242,254,0.15);border-radius:12px;padding:16px;">
+                <div style="display:flex;justify-content:space-between;font-size:15px;color:#fff;">
+                    <span>Montant à débiter</span>
+                    <strong id="cardTotalDisplay" style="color:var(--accent-cyan);font-size:18px;">0,00 €</strong>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;" id="cardRefDisplay"></div>
+            </div>
+
+            <button class="btn-pay-card" onclick=">
+                🔒 &nbsp; Confirmer le paiement
+            </button>
+            
+            
+            
+            
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modal confirmation -->
+
+
+
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <div class="confirm-icon">✓</div>
+        <h3>Commande confirmée !</h3>
+        <p>Merci pour votre commande. Veuillez effectuer votre virement bancaire et envoyer la confirmation à :</p>
+        <div class="confirm-email">Globalefinance@outlook.com</div>
+        <p style="font-size:13px;color:#94a3b8;">Mentionnez votre référence <strong id="confirmRef" style="color:var(--accent-cyan);"></strong> dans l'objet du mail.</p>
+        <button class="btn-download-invoice" onclick="downloadInvoice()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Télécharger ma facture PDF
+        </button>
+        <br>
+        <button class="btn-confirm-close" onclick="closeConfirm()">Félicitations, veuillez passer au paiement manuellement</button>
+   
+<!-- BLOC SEO VISIBLE EN BAS DE PAGE -->
+<section style="max-width:800px;margin:60px auto;padding:40px 20px;color:#cbd5e1">
+    <!-- BLOC CONFIANCE PREMIUM -->
+    <div style="margin-bottom:30px;padding:25px;background:linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);border:1px solid rgba(255,255,255,0.06);border-radius:14px;font-size:13px;line-height:1.8;text-align:left">
+        <strong style="color:#fff;font-size:15px;display:block;margin-bottom:14px">L’expertise ClimaZen au service de votre confort</strong>
+        
+        Depuis plusieurs années, ClimaZen accompagne ses clients dans le choix et l’acquisition de solutions de climatisation mobile performantes et adaptées à tous les environnements. Chaque produit référencé sur notre plateforme fait l’objet d’une sélection rigoureuse et de tests qualité avant mise en ligne. Notre objectif est de vous proposer des appareils fiables, durables et simples d’utilisation, sans nécessiter de travaux complexes ni d’installation technique avancée.
+        <br><br>
+        Nos climatiseurs portables 3-en-1 associent trois fonctions essentielles : rafraîchissement, ventilation et déshumidification. Cette polyvalence permet un usage optimal toute l’année, que ce soit pour maintenir une température agréable en période de forte chaleur ou pour assainir l’air dans les espaces humides. Grâce à une conception optimisée, nos modèles consomment moins d’énergie tout en offrant des performances stables et silencieuses.
+        <br><br>
+        Toutes les commandes bénéficient d’une garantie constructeur de deux ans, couvrant les pièces et la main d’œuvre. Le règlement par virement bancaire SEPA est sécurisé et conforme aux normes bancaires européennes. Vos données personnelles sont protégées et ne sont en aucun cas transmises à des tiers.
+    </div>
+    
+    <!-- GRILLE 6 AVANTAGES -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:15px;font-size:12.5px;color:#94a3b8;margin-bottom:25px">
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Livraison Express</strong>
+            Expédition rapide avec numéro de suivi détaillé et notifications à chaque étape
+        </div>
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Technologie 3-en-1</strong>
+            Climatisation, ventilation et déshumidification dans un seul appareil compact
+        </div>
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Installation Sans Travaux</strong>
+            Mise en service immédiate, sans perçage ni évacuation extérieure nécessaire
+        </div>
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Paiement Sécurisé</strong>
+            Virement bancaire SEPA crypté, données personnelles protégées et confidentielles
+        </div>
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Garantie 2 Ans</strong>
+            Couverture pièces et main d’œuvre avec service après-vente dédié et réactif
+        </div>
+        <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">
+            <div style="width:6px;height:6px;background:linear-gradient(90deg,#00f2fe,#2563eb);border-radius:50%;margin-bottom:6px"></div>
+            <strong style="color:#fff;display:block;margin-bottom:4px">Support Expert</strong>
+            Conseillers disponibles pour installation, utilisation et maintenance de votre appareil
+        </div>
+    </div>
+    
+    <!-- MOTS-CLÉS SEO -->
+    <p style="font-size:12px;color:#64748b;line-height:1.7;margin:0">
+        <strong style="color:#e2e8f0">ClimaZen</strong> : spécialiste des climatiseurs mobiles portables, ventilateurs colonne, ventilateurs sur pied et déshumidificateurs domestiques. 
+        Nos appareils combinent efficacité énergétique, design compact et installation simplifiée pour un confort thermique immédiat. 
+        Idéal pour appartements, maisons, bureaux, chambres à coucher, espaces de travail et locaux professionnels. 
+        Découvrez notre sélection de marques reconnues : CoolAir Pro, FreshBreeze, AirComfort.
+    </p>
+    
+    
+    
+</section>
+<!-- FOOTER PRO COMPLET -->
+<footer style="margin-top:80px;background:#0a0a0a;border-top:1px solid rgba(255,255,255,0.08);padding:40px 20px 20px;color:#94a3b8">
+    <div style="max-width:1000px;margin:0 auto">
+        
+        <!-- 4 COLONNES -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:30px;margin-bottom:30px;font-size:12.5px;line-height:1.8">
+            
+            <div>
+                <strong style="color:#fff;font-size:13px;display:block;margin-bottom:10px">ClimaZen</strong>
+                Spécialiste des climatiseurs mobiles 3-en-1 sans évacuation. 
+                Confort thermique, livraison rapide, garantie 2 ans, service client dédié.
+            </div>
+            
+            <div>
+                <strong style="color:#fff;font-size:13px;display:block;margin-bottom:10px">Produits</strong>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Climatiseurs portables</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Ventilateurs sur pied</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Colonnes ventilées</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Déshumidificateurs</a>
+            </div>
+            
+            <div>
+                <strong style="color:#fff;font-size:13px;display:block;margin-bottom:10px">Aide & Support</strong>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Installation facile</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Garantie 2 ans</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Suivi de commande</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Contact service client</a>
+            </div>
+            
+            <div>
+                <strong style="color:#fff;font-size:13px;display:block;margin-bottom:10px">Paiement & Livraison</strong>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Virement SEPA sécurisé</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Livraison express avec suivi</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">Retour 14 jours</a>
+                <a href="#" style="color:#94a3b8;text-decoration:none;display:block">CGV</a>
+            </div>
+        </div>
+        
+        <!-- LIGNE SÉPARATEUR -->
+        <div style="height:1px;background:rgba(255,255,255,0.08);margin:25px 0"></div>
+        
+        <!-- COPYRIGHT + SEO -->
+        <div style="text-align:center;font-size:11px;color:#64748b;line-height:1.6">
+            <div style="color:#e2e8f0;font-weight:500;margin-bottom:6px">
+                © 2026 ClimaZen. Tous droits réservés.
+            </div>
+            <div style="margin-bottom:8px">
+                Climatiseurs mobiles portables - Ventilateurs colonne - Déshumidificateurs domestiques
+            </div>
+            <div style="font-size:10px;opacity:0.7">
+                Marques CoolAir Pro, FreshBreeze, AirComfort. Installation sans travaux. Paiement virement bancaire SEPA crypté.
+                Politique de confidentialité conforme RGPD. Données personnelles protégées et non transmises à des tiers.
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+    
+
+    
+</div>
+
+
+<script>
+// ============================
+// ÉTAT GLOBAL
+// ============================
+let cart = [];
+let currentOrderData = {};
+let shippingCostValue = 0;
+
+const EUROPE_COUNTRIES = ['FR','BE','CH','LU','DE','ES','IT','PT','NL','AT','PL','SE','DK','FI','IE','GR','CZ','RO','HU','NO'];
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (localStorage.getItem("climareon_privacy_hide") === "true") {
+        document.getElementById('cookieScreenLock').style.display = 'none';
+    } else {
+        document.body.style.overflow = "hidden";
+    }
+});
+
+function acceptPrivacy() {
+    localStorage.setItem("climareon_privacy_hide", "true");
+    document.getElementById('cookieScreenLock').style.display = 'none';
+    document.body.style.overflow = "";
+}
+
+// ============================
+// NAVIGATION
+// ============================
+function toggleMenu() {
+    let drawer = document.getElementById('navDrawer');
+    let overlay = document.getElementById('globalOverlay');
+    let isCartOpen = document.getElementById('cartDrawer').classList.contains('open');
+    if(isCartOpen) document.getElementById('cartDrawer').classList.remove('open');
+    drawer.classList.toggle('open');
+    if(drawer.classList.contains('open')) {
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function toggleCart() {
+    let cartDrawer = document.getElementById('cartDrawer');
+    let overlay = document.getElementById('globalOverlay');
+    let isMenuOpen = document.getElementById('navDrawer').classList.contains('open');
+    if(isMenuOpen) document.getElementById('navDrawer').classList.remove('open');
+    cartDrawer.classList.toggle('open');
+    if(cartDrawer.classList.contains('open')) {
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function closeAllDrawers() {
+    document.getElementById('navDrawer').classList.remove('open');
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('globalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function toggleSpecs(drawerId) {
+    let drawer = document.getElementById(drawerId);
+    drawer.style.display = (drawer.style.display === "block") ? "none" : "block";
+}
+
+function toggleExpand(header) {
+    let body = header.nextElementSibling;
+    let isOpen = header.classList.contains('active');
+    header.classList.toggle('active', !isOpen);
+    body.style.display = isOpen ? 'none' : 'block';
+}
+
+function toggleFaq(element) {
+    let answer = element.nextElementSibling;
+    let span = element.querySelector('span');
+    if(answer.style.display === "block") {
+        answer.style.display = "none";
+        span.innerText = "+";
+    } else {
+        answer.style.display = "block";
+        span.innerText = "-";
+    }
+}
+
+// ============================
+// PANIER
+// ============================
+function addItemToCart(productName, price) {
+    let existingItem = cart.find(item => item.name === productName);
+    if(existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({ name: productName, price: price, quantity: 1 });
+    }
+    updateCartUI();
+    let toast = document.getElementById('cartToast');
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 2000);
+}
+
+function removeItemFromCart(productName) {
+    cart = cart.filter(item => item.name !== productName);
+    updateCartUI();
+}
+
+function updateCartUI() {
+    let listContainer = document.getElementById('cartItemsList');
+    let badgeNavbar = document.getElementById('cartBadgeCount');
+    let badgeFloating = document.getElementById('floatingCartBadgeCount');
+    let totalLine = document.getElementById('cartTotalLine');
+    let totalAmount = document.getElementById('cartTotalAmount');
+
+    let totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+    let totalPrice = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+    badgeNavbar.innerText = totalItems;
+    badgeFloating.innerText = totalItems;
+
+    if(cart.length === 0) {
+        listContainer.innerHTML = '<div class="cart-empty-msg">Votre panier est actuellement vide.</div>';
+        totalLine.style.display = 'none';
+        return;
+    }
+
+    totalLine.style.display = 'flex';
+    totalAmount.innerText = formatEur(totalPrice);
+
+    listContainer.innerHTML = '';
+    cart.forEach(item => {
+        let row = document.createElement('div');
+        row.className = 'cart-item-row';
+        let lineTotal = formatEur(item.price * item.quantity);
+        row.innerHTML = `
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <span>Qté : ${item.quantity} — ${lineTotal}</span>
+            </div>
+            <button class="cart-item-remove" onclick="removeItemFromCart('${item.name.replace(/'/g, "\\'")}')">✕</button>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+function formatEur(n) {
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+// ============================
+// LIVRAISON
+// ============================
+function isEurope() {
+    let sel = document.getElementById('cf-pays');
+    if (!sel) return true;
+    let opt = sel.options[sel.selectedIndex];
+    return opt.getAttribute('data-europe') === 'true';
+}
+
+function updateShipping() {
+    let europe = isEurope();
+    shippingCostValue = europe ? 0 : 20;
+
+    document.getElementById('shippingZone').textContent = europe ? 'Europe' : 'Hors Europe';
+    let costEl = document.getElementById('shippingCost');
+    if(europe) {
+        costEl.textContent = 'Gratuit';
+        costEl.className = 'shipping-free';
+    } else {
+        costEl.textContent = '20,00 €';
+        costEl.className = 'shipping-paid';
+    }
+
+    // Mettre à jour les totaux
+    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    let tva = subtotal * 0.20;
+    let total = subtotal + tva + shippingCostValue;
+
+    document.getElementById('checkoutSubtotal').textContent = formatEur(subtotal);
+    document.getElementById('checkoutTVA').textContent = formatEur(tva);
+    document.getElementById('checkoutShipping').textContent = shippingCostValue === 0 ? 'Gratuit' : formatEur(shippingCostValue);
+    document.getElementById('checkoutTotal').textContent = formatEur(total);
+}
+
+// ============================
+// CHECKOUT : OUVERTURE
+// ============================
+function openCheckout() {
+    if(cart.length === 0) {
+        alert("Votre panier est vide. Ajoutez des produits avant de continuer.");
+        return;
+    }
+
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('globalOverlay').style.display = 'none';
+
+    // Générer une référence commande unique
+    let ref = 'CLIM-2026-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('orderRef').innerText = ref;
+
+    // Remplir récapitulatif
+    let recap = document.getElementById('checkoutRecap');
+    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    let tva = subtotal * 0.20;
+    let total = subtotal + tva + shippingCostValue;
+
+    let recapHTML = '';
+    cart.forEach(item => {
+        recapHTML += `
+            <div class="recap-item">
+                <strong>${item.name} × ${item.quantity}</strong>
+                <span class="recap-price">${formatEur(item.price * item.quantity)}</span>
+            </div>
+        `;
+    });
+    recap.innerHTML = recapHTML;
+
+    document.getElementById('checkoutSubtotal').textContent = formatEur(subtotal);
+    document.getElementById('checkoutTVA').textContent = formatEur(tva);
+    document.getElementById('checkoutShipping').textContent = shippingCostValue === 0 ? 'Gratuit' : formatEur(shippingCostValue);
+    document.getElementById('checkoutTotal').textContent = formatEur(total);
+
+    let overlay = document.getElementById('checkoutOverlay');
+    overlay.classList.add('open');
+    overlay.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCheckout() {
+    document.getElementById('checkoutOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// ============================
+// VALIDATION → AFFICHE PAGE CARTE
+// ============================
+function placeOrder() {
+    let prenom = document.getElementById('cf-prenom').value.trim();
+    let nom = document.getElementById('cf-nom').value.trim();
+    let rue = document.getElementById('cf-rue').value.trim();
+    let cp = document.getElementById('cf-cp').value.trim();
+    let ville = document.getElementById('cf-ville').value.trim();
+    let tel = document.getElementById('cf-tel').value.trim();
+    let email = document.getElementById('cf-email').value.trim();
+    let cgv = document.getElementById('cgvCheck').checked;
+
+    if(!prenom || !nom || !rue || !cp || !ville || !tel || !email) {
+        alert("Veuillez remplir tous les champs obligatoires (marqués d'un *).");
+        return;
+    }
+    if(!cgv) {
+        alert("Veuillez accepter les conditions générales pour continuer.");
+        return;
+    }
+
+    // Sauvegarder les données de commande
+    let ref = document.getElementById('orderRef').innerText;
+    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    let tva = subtotal * 0.20;
+    let total = subtotal + tva + shippingCostValue;
+
+    let sel = document.getElementById('cf-pays');
+    let paysLabel = sel.options[sel.selectedIndex].text;
+
+    currentOrderData = {
+        ref, prenom, nom, entreprise: document.getElementById('cf-entreprise').value.trim(),
+        rue, rue2: document.getElementById('cf-rue2').value.trim(),
+        cp, ville, pays: paysLabel, tel, email,
+        items: [...cart], subtotal, tva, shipping: shippingCostValue, total
+    };
+
+    // Fermer le checkout et ouvrir la page carte
+    closeCheckout();
+
+    // Remplir le montant sur la page carte
+    document.getElementById('cardTotalDisplay').textContent = formatEur(total);
+    document.getElementById('cardRefDisplay').textContent = 'Référence commande : ' + ref;
+
+    let cardOverlay = document.getElementById('cardPaymentOverlay');
+    cardOverlay.classList.add('open');
+    cardOverlay.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCardPayment() {
+    document.getElementById('cardPaymentOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    // Rouvrir le checkout
+    document.getElementById('checkoutOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+// ============================
+// FORMAT CARTE
+// ============================
+function formatCardNumber(input) {
+    let v = input.value.replace(/\D/g, '').substring(0, 16);
+    input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+function formatExpiry(input) {
+    let v = input.value.replace(/\D/g, '').substring(0, 4);
+    if(v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
+    input.value = v;
+}
+
+// ============================
+// CONFIRMER PAIEMENT CARTE
+// ============================
+function confirmCardPayment() {
+    let holder = document.getElementById('card-holder').value.trim();
+    let number = document.getElementById('card-number').value.trim();
+    let expiry = document.getElementById('card-expiry').value.trim();
+    let cvv = document.getElementById('card-cvv').value.trim();
+
+    if(!holder || !number || !expiry || !cvv) {
+        alert("Veuillez remplir tous les champs de carte.");
+        return;
+    }
+    if(number.replace(/\s/g,'').length < 16) {
+        alert("Numéro de carte invalide.");
+        return;
+    }
+
+    // Fermer la page carte
+    document.getElementById('cardPaymentOverlay').classList.remove('open');
+
+    // Afficher la confirmation
+    document.getElementById('confirmRef').innerText = currentOrderData.ref;
+    document.getElementById('confirmOverlay').classList.add('open');
+
+    // Vider le panier
+    cart = [];
+    updateCartUI();
+}
+
+// ============================
+// FERMER CONFIRMATION
+// ============================
+function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// ============================
+// GÉNÉRATION FACTURE PDF
+// ============================
+function downloadInvoice() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const d = currentOrderData;
+    const dateStr = new Date().toLocaleDateString('fr-FR', { year:'numeric', month:'long', day:'numeric' });
+    const pageW = 210;
+    const margin = 20;
+    const contentW = pageW - margin * 2;
+
+    // === COULEURS ===
+    const darkBlue = [4, 9, 26];
+    const accentBlue = [0, 102, 255];
+    const accentCyan = [0, 200, 220];
+    const lightGray = [245, 247, 252];
+    const midGray = [148, 163, 184];
+    const white = [255, 255, 255];
+    const textDark = [15, 23, 42];
+
+    // ====== HEADER FOND BLEU ======
+    doc.setFillColor(...darkBlue);
+    doc.rect(0, 0, pageW, 55, 'F');
+
+    // Dégradé cyan en haut à gauche (simulé)
+    doc.setFillColor(...accentCyan);
+    doc.circle(-5, -5, 35, 'F');
+
+    // === LOGO SVG (dessiné en PDF) ===
+    // Cercle extérieur logo
+    doc.setFillColor(...accentBlue);
+    doc.circle(28, 27, 10, 'F');
+    doc.setFillColor(...accentCyan);
+    doc.circle(25, 24, 7, 'F');
+    doc.setFillColor(...darkBlue);
+    doc.circle(26, 25, 5, 'F');
+    // Lettre "R" stylisée
+    doc.setFillColor(...white);
+    doc.rect(24, 21, 1.5, 8, 'F');
+    doc.rect(24, 21, 5, 1.5, 'F');
+    doc.rect(24, 24.5, 5, 1.5, 'F');
+    doc.setFillColor(...accentCyan);
+    doc.rect(26, 26, 1.5, 3, 'F');
+    // Vague sous le logo
+    doc.setDrawColor(...accentCyan);
+    doc.setLineWidth(1);
+    doc.line(20, 34, 38, 34);
+
+    // Nom CLIMAREON
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(...white);
+    doc.text('CLIMAREON', 42, 26);
+
+    // Sous-titre
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...accentCyan);
+    doc.text('EXPERT EN CLIMATISATION', 42, 32);
+
+    // Ligne séparatrice
+    doc.setDrawColor(...accentBlue);
+    doc.setLineWidth(0.3);
+    doc.line(42, 34, 120, 34);
+
+    // Contact dans le header
+    doc.setFontSize(8);
+    doc.setTextColor(180, 200, 230);
+    doc.text('Globalefinance@outlook.com  |  +33 07 57 75 03 03', 42, 40);
+
+    // Bloc FACTURE (droite du header)
+    doc.setFillColor(...accentBlue);
+    doc.roundedRect(140, 10, 55, 35, 4, 4, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(...white);
+    doc.text('FACTURE', 167, 24, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(200, 225, 255);
+    doc.text('N° ' + d.ref, 167, 32, { align: 'center' });
+    doc.text(dateStr, 167, 39, { align: 'center' });
+
+    // ====== BANDE CLAIRE ======
+    doc.setFillColor(...lightGray);
+    doc.rect(0, 55, pageW, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...accentBlue);
+    doc.text('DOCUMENT OFFICIEL — CONSERVEZ CETTE FACTURE POUR VOS ARCHIVES', pageW/2, 60, { align: 'center' });
+
+    // ====== INFOS CLIENT & VENDEUR ======
+    let y = 72;
+
+    // Bloc Vendeur
+    doc.setFillColor(...white);
+    doc.setDrawColor(...accentBlue);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, y, 80, 48, 3, 3, 'FD');
+
+    doc.setFillColor(...accentBlue);
+    doc.roundedRect(margin, y, 80, 8, 3, 3, 'F');
+    doc.rect(margin, y+5, 80, 3, 'F'); // Carré bas pour jointure
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...white);
+    doc.text('VENDEUR', margin + 4, y + 5.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...textDark);
+    doc.text('CLIMAREON Inc.', margin + 4, y + 16);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...midGray);
+    doc.text('Expert en Climatisation', margin + 4, y + 22);
+    doc.text('Globalefinance@outlook.com', margin + 4, y + 28);
+    doc.text('+33 07 57 75 03 03', margin + 4, y + 34);
+    doc.text('France', margin + 4, y + 40);
+
+    // Bloc Client
+    doc.setFillColor(...white);
+    doc.setDrawColor(...accentBlue);
+    doc.roundedRect(110, y, 80, 48, 3, 3, 'FD');
+
+    doc.setFillColor(...darkBlue);
+    doc.roundedRect(110, y, 80, 8, 3, 3, 'F');
+    doc.rect(110, y+5, 80, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...white);
+    doc.text('FACTURÉ À', 114, y + 5.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...textDark);
+    doc.text(d.prenom + ' ' + d.nom.toUpperCase(), 114, y + 16);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...midGray);
+    if(d.entreprise) doc.text(d.entreprise, 114, y + 22);
+    let addrY = d.entreprise ? y + 28 : y + 22;
+    doc.text(d.rue, 114, addrY);
+    if(d.rue2) { doc.text(d.rue2, 114, addrY+6); addrY += 6; }
+    doc.text(d.cp + ' ' + d.ville, 114, addrY + 6);
+    doc.text(d.pays, 114, addrY + 12);
+    doc.text(d.email, 114, addrY + 18);
+
+    // ====== TABLEAU PRODUITS ======
+    y += 58;
+
+    // En-tête tableau
+    doc.setFillColor(...darkBlue);
+    doc.rect(margin, y, contentW, 9, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...white);
+    doc.text('DÉSIGNATION', margin + 4, y + 6);
+    doc.text('QTÉ', margin + 110, y + 6, { align: 'center' });
+    doc.text('P.U. HT', margin + 130, y + 6, { align: 'center' });
+    doc.text('TOTAL HT', margin + 158, y + 6, { align: 'right' });
+
+    y += 9;
+    let alt = false;
+    d.items.forEach((item, i) => {
+        let ht = item.price * item.quantity;
+        if(alt) {
+            doc.setFillColor(240, 245, 252);
+            doc.rect(margin, y, contentW, 8, 'F');
+        }
+        alt = !alt;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...textDark);
+        doc.text(item.name, margin + 4, y + 5.5);
+        doc.text(String(item.quantity), margin + 110, y + 5.5, { align: 'center' });
+        doc.text(formatEurPdf(item.price), margin + 130, y + 5.5, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        doc.text(formatEurPdf(ht), margin + 158, y + 5.5, { align: 'right' });
+
+        // Ligne séparatrice
+        doc.setDrawColor(220, 230, 245);
+        doc.setLineWidth(0.2);
+        doc.line(margin, y + 8, margin + contentW, y + 8);
+        y += 8;
+    });
+
+    // ====== TOTAUX ======
+    y += 8;
+
+    // Bloc totaux (droite)
+    let totX = 120;
+    let totW = 70;
+
+    doc.setFillColor(...lightGray);
+    doc.roundedRect(totX, y, totW, 36, 3, 3, 'F');
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...midGray);
+    doc.text('Sous-total HT', totX + 4, y + 9);
+    doc.setTextColor(...textDark);
+    doc.text(formatEurPdf(d.subtotal), totX + totW - 4, y + 9, { align: 'right' });
+
+    doc.setTextColor(...midGray);
+    doc.text('TVA (20%)', totX + 4, y + 17);
+    doc.setTextColor(...textDark);
+    doc.text(formatEurPdf(d.tva), totX + totW - 4, y + 17, { align: 'right' });
+
+    doc.setTextColor(...midGray);
+    doc.text('Livraison', totX + 4, y + 25);
+    doc.setTextColor(34, 197, 94);
+    doc.text(d.shipping === 0 ? 'Gratuit' : formatEurPdf(d.shipping), totX + totW - 4, y + 25, { align: 'right' });
+
+    // Total TTC
+    doc.setFillColor(...accentBlue);
+    doc.roundedRect(totX, y + 30, totW, 11, 3, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...white);
+    doc.text('TOTAL TTC', totX + 4, y + 37);
+    doc.text(formatEurPdf(d.total), totX + totW - 4, y + 37, { align: 'right' });
+
+    // ====== INFOS BANCAIRES ======
+    y += 50;
+
+    doc.setFillColor(240, 247, 255);
+    doc.setDrawColor(...accentBlue);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, y, contentW, 42, 3, 3, 'FD');
+
+    // Barre titre
+    doc.setFillColor(...accentBlue);
+    doc.roundedRect(margin, y, contentW, 9, 3, 3, 'F');
+    doc.rect(margin, y+6, contentW, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...white);
+    doc.text('COORDONNÉES BANCAIRES POUR VIREMENT', margin + 4, y + 6);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    let bx1 = margin + 4;
+    let bx2 = margin + 50;
+    let bankY = y + 17;
+
+    const bankRow = (label, value, yy) => {
+        doc.setTextColor(...midGray);
+        doc.text(label, bx1, yy);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...textDark);
+        doc.text(value, bx2, yy);
+        doc.setFont('helvetica', 'normal');
+    };
+    bankRow('Bénéficiaire :', 'LAURENA DOSSANTOS PEREIRA', bankY);
+    bankRow('IBAN :', 'FR76 1723 8000 0100 4292 1011 975', bankY + 8);
+    bankRow('BIC :', 'SCSYFRP2', bankY + 16);
+    bankRow('Référence :', d.ref, bankY + 24);
+
+    // ====== PIED DE PAGE ======
+    let footY = 278;
+    doc.setFillColor(...darkBlue);
+    doc.rect(0, footY, pageW, 19, 'F');
+
+    doc.setFillColor(...accentCyan);
+    doc.rect(0, footY, 3, 19, 'F');
+    doc.setFillColor(...accentBlue);
+    doc.rect(3, footY, 2, 19, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...accentCyan);
+    doc.text('CLIMAREON', margin, footY + 7);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(180, 200, 230);
+    doc.text('Expert en climatisation · Votre confort, notre priorité', margin, footY + 13);
+
+    doc.setTextColor(...midGray);
+    doc.text('Globalefinance@outlook.com  |  +33 07 57 75 03 03', pageW/2, footY + 7, { align: 'center' });
+    doc.text('Document généré le ' + dateStr + '  |  Réf. ' + d.ref, pageW/2, footY + 13, { align: 'center' });
+
+    doc.setTextColor(...accentBlue);
+    doc.text('Page 1/1', pageW - margin, footY + 10, { align: 'right' });
+
+    // Télécharger
+    doc.save('Facture_CLIMAREON_' + d.ref + '.pdf');
+}
+
+function formatEurPdf(n) {
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+</script>
+
+</body>
+</html>
