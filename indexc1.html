@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Climatiseurs 12 000 BTU — Comparateur</title>
+<style>
+:root {
+  --bg-dark: #04091a; 
+  --bg-card: #0b1536;
+  --bg-card-hover: #111f4d;
+  --accent-cyan: #00f2fe;
+  --accent-blue: #0066ff;
+  --text-light: #f8fafc;
+  --text-muted: #94a3b8;
+  --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.2);
+}
+
+html { overflow-x: hidden; max-width: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+
+body { 
+  background-color: var(--bg-dark); 
+  color: var(--text-light); 
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  margin: 0; padding: 0; width: 100%; position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed; top: -10%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(4, 9, 26, 0) 70%);
+  z-index: -1; pointer-events: none;
+}
+
+header { 
+  background: #ffffff; position: sticky; top: 0; z-index: 100; 
+  padding: 15px 40px; border-bottom: 2px solid var(--accent-blue); 
+  display: flex; justify-content: space-between; align-items: center; 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%;
+}
+
+.logo-container {
+  display: flex; align-items: center; text-decoration: none;
+  cursor: pointer; transition: transform 0.3s ease;
+}
+.logo-container:hover { transform: scale(1.02); }
+.logo-text-group { display: flex; flex-direction: column; justify-content: center; }
+.logo-title {
+  font-weight: 800; font-size: 26px; letter-spacing: 2px; line-height: 1;
+  background: linear-gradient(135deg, #04091a 30%, var(--accent-blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+.logo-subtitle {
+  font-size: 9px; letter-spacing: 1.8px; color: #475569; font-weight: 600;
+  margin-top: 4px; text-transform: uppercase;
+  border-top: 1px solid rgba(0, 102, 255, 0.3); padding-top: 2px;
+}
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0, 102, 255, 0.08); border: 1px solid rgba(0, 102, 255, 0.3);
+  color: var(--accent-blue); text-decoration: none; font-weight: 700; font-size: 13.5px;
+  padding: 9px 18px; border-radius: 30px; transition: all 0.25s ease;
+}
+.btn-back:hover { background: var(--accent-blue); color: #fff; transform: translateX(-3px); }
+
+.breadcrumb-bar {
+  max-width: 1140px; margin: 24px auto 0; padding: 0 24px;
+}
+.breadcrumb-text { color: var(--text-muted); font-size: 13px; }
+.breadcrumb-text strong { color: var(--accent-cyan); }
+
+.page-title-wrap { max-width: 1140px; margin: 18px auto 0; padding: 0 24px; }
+.hero-tagline {
+  background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: var(--accent-cyan);
+  text-transform: uppercase; font-size: 11.5px; font-weight: 700; letter-spacing: 2px; padding: 6px 16px;
+  border-radius: 30px; display: inline-block; margin-bottom: 16px; box-shadow: var(--shadow-glow);
+}
+.page-title-wrap h1 {
+  font-size: clamp(24px, 4.5vw, 36px); font-weight: 800; line-height: 1.25; margin: 0 0 10px;
+  background: linear-gradient(180deg, #ffffff 40%, #a2c4ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.page-title-wrap p { color: var(--text-muted); font-size: 15px; margin: 0; max-width: 600px; }
+
+/* ============================
+   SELECTEUR DE PRODUITS
+============================= */
+.product-selector {
+  max-width: 1140px; margin: 36px auto 0; padding: 0 24px;
+}
+.selector-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px;
+}
+.selector-card {
+  background: var(--bg-card); border: 1.5px solid rgba(0, 242, 254, 0.12); border-radius: 16px;
+  padding: 16px; cursor: pointer; text-align: left; color: inherit; font-family: inherit;
+  display: flex; flex-direction: column; gap: 8px; transition: all 0.25s ease; position: relative;
+}
+.selector-card:hover { border-color: rgba(0, 242, 254, 0.4); transform: translateY(-3px); }
+.selector-card.active {
+  border-color: var(--accent-cyan); background: var(--bg-card-hover);
+  box-shadow: 0 0 0 1px var(--accent-cyan), 0 10px 25px rgba(0,242,254,0.15);
+}
+.selector-card.disabled { opacity: 0.45; cursor: not-allowed; }
+.selector-card.disabled:hover { transform: none; border-color: rgba(0, 242, 254, 0.12); }
+.selector-card-tier {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--accent-cyan); opacity: 0.85;
+}
+.selector-card-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
+.selector-card-price { font-size: 15px; font-weight: 800; color: var(--accent-cyan); }
+.selector-card-price .old { font-size: 11.5px; color: var(--text-muted); text-decoration: line-through; font-weight: 600; margin-right: 6px; }
+.selector-check {
+  position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent-cyan); color: #04091a; display: none; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+}
+.selector-card.active .selector-check { display: flex; }
+.selector-card-soon { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+/* ============================
+   PANNEAU DE DETAILS (dynamique)
+============================= */
+.product-detail { max-width: 1140px; margin: 40px auto 0; padding: 0 24px; }
+
+.product-hero {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 50px; align-items: flex-start;
+}
+@media (max-width: 860px) { .product-hero { grid-template-columns: 1fr; } }
+
+.product-hero-image-wrap {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.15);
+  border-radius: 24px; padding: 20px; position: relative; overflow: hidden;
+}
+.product-hero-image-wrap::before {
+  content: ""; position: absolute; width: 200px; height: 200px;
+  background: var(--accent-cyan); filter: blur(80px); opacity: 0.15; top: -40px; right: -40px;
+}
+.product-hero-image-wrap img {
+  width: 100%; height: 380px; object-fit: contain; border-radius: 16px;
+  position: relative; z-index: 1; display: block; background: #04081c;
+}
+.product-hero-badges { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.hero-mini-badge {
+  background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.3);
+  color: var(--accent-cyan); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 6px 12px; border-radius: 20px;
+}
+.hero-mini-badge.discount { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #f87171; }
+
+.product-hero-info { padding-top: 6px; }
+.product-tier-tag {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent-cyan); margin-bottom: 8px; display: block;
+}
+.product-hero-info h1 {
+  font-size: clamp(24px, 4.5vw, 34px); font-weight: 800; line-height: 1.25; margin: 0 0 14px;
+  color: #fff;
+}
+.product-hero-info p.desc { color: var(--text-muted); font-size: 15px; margin: 0 0 26px; max-width: 480px; }
+
+.product-hero-price-box {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.15);
+  border-radius: 16px; padding: 22px 24px; margin-bottom: 22px;
+}
+.price-block-hero { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+.price-old-hero { font-size: 16px; color: var(--text-muted); text-decoration: line-through; }
+.price-new-hero { font-size: 30px; font-weight: 800; color: var(--accent-cyan); }
+.price-save { font-size: 12.5px; color: #22c55e; font-weight: 700; }
+
+.product-hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn-premium {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); color: #fff;
+  padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14.5px;
+  box-shadow: 0 4px 20px rgba(0, 242, 254, 0.4); transition: transform 0.2s, box-shadow 0.2s;
+  border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-premium:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 242, 254, 0.6); }
+.btn-outline-cta {
+  background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #fff;
+  padding: 14px 28px; border-radius: 30px; font-weight: 700; font-size: 14.5px; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center;
+}
+
+/* Description */
+.section-block { max-width: 1140px; margin: 60px auto 0; padding: 0 24px; }
+.section-block h2 {
+  font-size: clamp(20px, 4vw, 26px); font-weight: 800; color: #fff; margin: 0 0 26px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-block h2::before {
+  content: ""; width: 6px; height: 24px; background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+  border-radius: 4px; display: inline-block;
+}
+
+/* Fiche technique */
+.specs-full-grid {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.15);
+  border-radius: 20px; overflow: hidden;
+}
+.specs-full-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 18px 26px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.specs-full-row:last-child { border-bottom: none; }
+.specs-full-row:nth-child(odd) { background: rgba(255,255,255,0.015); }
+.specs-full-row span { color: var(--text-muted); font-size: 14px; }
+.specs-full-row strong { color: var(--accent-cyan); font-size: 14px; text-align: right; }
+@media (max-width: 480px) {
+  .specs-full-row { grid-template-columns: 1fr; gap: 4px; }
+  .specs-full-row strong { text-align: left; }
+}
+
+.image-note {
+  margin-top: 14px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+}
+
+/* Avantages */
+.about-text-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 760px) { .about-text-grid { grid-template-columns: 1fr; } }
+.about-text-card {
+  background: var(--bg-card); border: 1px solid rgba(0, 242, 254, 0.1); border-radius: 16px;
+  padding: 22px; transition: border-color 0.3s, transform 0.3s;
+}
+.about-text-card:hover { border-color: rgba(0, 242, 254, 0.35); transform: translateY(-3px); }
+.about-text-card .icon-circle {
+  width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 242, 254, 0.1);
+  border: 1px solid var(--accent-cyan); display: flex; align-items: center; justify-content: center;
+  color: var(--accent-cyan); margin-bottom: 14px; font-size: 14px; font-weight: 800;
+}
+.about-text-card h3 { margin: 0 0 8px; font-size: 15.5px; color: #fff; }
+.about-text-card p { margin: 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.7; }
+
+/* Guide d'achat */
+.guide-box {
+  background: linear-gradient(135deg, rgba(0,242,254,0.06), rgba(0,102,255,0.04));
+  border: 1px solid rgba(0,242,254,0.18); border-radius: 18px; padding: 28px 30px;
+  font-size: 15px; color: #cbd5e1; line-height: 1.8;
+}
+
+/* Toast notification panier */
+.toast-notification {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+  border: 1.5px solid var(--accent-cyan); color: #fff; padding: 14px 28px;
+  border-radius: 30px; font-weight: 600; font-size: 14.5px;
+  box-shadow: 0 10px 30px rgba(0, 242, 254, 0.3); z-index: 3000;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+  opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+}
+.toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-notification svg { flex-shrink: 0; color: var(--accent-cyan); }
+
+footer { background: #02040c; padding: 50px 24px; color: #475569; font-size: 12px; text-align: center; border-top: 1px solid rgba(0, 242, 254, 0.1); margin-top: 80px; }
+footer a { color: var(--accent-cyan); text-decoration: none; }
+
+@media (max-width: 768px) {
+  header { padding: 15px 20px; }
+  .logo-title { font-size: 20px; }
+  .logo-subtitle { font-size: 8px; letter-spacing: 1.2px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo-container">
+    <div class="logo-text-group">
+      <span class="logo-title">Climareon</span>
+      <span class="logo-subtitle">Comparateur Climatiseurs</span>
+    </div>
+  </a>
+  <a href="index.html" class="btn-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Retour à l'accueil
+  </a>
+</header>
+
+<div class="breadcrumb-bar">
+  <span class="breadcrumb-text">Accueil &nbsp;/&nbsp; Climatiseurs &nbsp;/&nbsp; <strong id="breadcrumbName">Beko BS207C</strong></span>
+</div>
+
+<div class="page-title-wrap">
+  <span class="hero-tagline">Climatiseurs 12 000 BTU</span>
+  <h1>Comparez et choisissez votre climatiseur</h1>
+  <p>Sélectionnez un modèle ci-dessous pour afficher ses caractéristiques complètes.</p>
+</div>
+
+<!-- SELECTEUR -->
+<div class="product-selector">
+  <div class="selector-grid" id="selectorGrid"></div>
+</div>
+
+<!-- DETAIL DYNAMIQUE -->
+<section class="product-detail">
+  <div class="product-hero">
+    <div class="product-hero-image-wrap">
+      <img id="detailImg" src="" alt="">
+      <div class="product-hero-badges" id="detailBadges"></div>
+      <div class="image-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span id="detailImgName"></span>
+      </div>
+    </div>
+
+    <div class="product-hero-info">
+      <span class="product-tier-tag" id="detailTier"></span>
+      <h1 id="detailName"></h1>
+      <p class="desc" id="detailDesc"></p>
+
+      <div class="product-hero-price-box">
+        <div class="price-block-hero">
+          <span class="price-old-hero" id="detailOldPrice"></span>
+          <span class="price-new-hero" id="detailNewPrice"></span>
+        </div>
+        <span class="price-save" id="detailSave"></span>
+      </div>
+
+      <div class="product-hero-actions">
+        <button class="btn-premium" id="addToCartBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Ajouter au panier
+        </button>
+        <a href="index.html" class="btn-outline-cta">Voir d'autres produits</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI CHOISIR CE MODELE -->
+<section class="section-block">
+  <h2 id="advTitle">Pourquoi choisir ce modèle</h2>
+  <div class="about-text-grid" id="advGrid"></div>
+</section>
+
+<!-- FICHE TECHNIQUE -->
+<section class="section-block">
+  <h2>Fiche technique</h2>
+  <div class="specs-full-grid" id="specsGrid"></div>
+</section>
+
+<!-- GUIDE D'ACHAT -->
+<section class="section-block">
+  <h2>Pour qui est fait ce modèle</h2>
+  <div class="guide-box" id="guideBox"></div>
+</section>
+
+<footer>
+  <p>&copy; 2026 Climareon — Tous droits réservés. <a href="index.html">Retour à l'accueil</a></p>
+</footer>
+
+<div class="toast-notification" id="cartToast">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="cartToastText">Ajouté au panier</span>
+</div>
+
+<script>
+const products = [
+  {
+    id: "elsay",
+    tier: "",
+    name: "Elsay 12 000 BTU",
+    desc: "Climatiseur mobile réversible pour pièces de 25 à 35 m². Froid & chaud, déshumidification, télécommande, écran LCD. Gaz R290 – Classe A.",
+    oldPrice: "349,00 €",
+    newPrice: "324,10 €",
+    discountPct: 7,
+    image: "image11.jpg",
+    specs: [
+      ["Puissance", "3 600 W / 12 000 BTU"],
+      ["Surface", "25 à 35 m²"],
+      ["Débit d'air", "400 m³/h"],
+      ["Déshumidification", "19 L/jour"],
+      ["Vitesses", "3 vitesses"],
+      ["Minuteur", "24 h"],
+      ["Réfrigérant", "R290"],
+      ["Classe énergie", "A"]
+    ],
+    advantages: [
+      ["Réversible toute l'année", "Rafraîchit en été et chauffe en hiver : un seul appareil couvre les deux saisons, pas besoin d'un radiateur d'appoint en plus."],
+      ["Débit d'air généreux", "400 m³/h assure une circulation d'air homogène dans toute la pièce, même dans les angles éloignés de l'appareil."],
+      ["Déshumidification 19 L/jour", "Idéal dans les régions humides : l'air est asséché en continu pour un confort plus sain, sans excès d'humidité sur les murs ou les vitres."],
+      ["3 vitesses + minuteur 24 h", "Réglez la puissance selon le moment de la journée et programmez l'arrêt automatique pour économiser de l'énergie la nuit."]
+    ],
+    guide: "L'Elsay 12 000 BTU est pensé pour les pièces de taille moyenne (chambre, salon, bureau) où l'on cherche un appareil simple, polyvalent et économique à l'achat. Sa classe énergétique A et son gaz R290, peu impactant pour l'environnement, en font une valeur sûre pour un usage quotidien."
+  },
+  {
+    id: "beko",
+    tier: "",
+    name: "Beko BS207C – 12 000 BTU",
+    desc: "Climatiseur mobile pour 30 à 35 m². Refroidissement, ventilation, déshumidification. Affichage numérique, télécommande, minuteur 24 h. Gaz R290 – Classe A.",
+    oldPrice: "349,99 €",
+    newPrice: "324,99 €",
+    discountPct: 7,
+    image: "image-beko.jpg",
+    specs: [
+      ["Puissance", "12 000 BTU"],
+      ["Surface", "30 à 35 m²"],
+      ["Fonctions", "Froid / Ventil / Déshum"],
+      ["Minuteur", "24 h"],
+      ["Réfrigérant", "R290"],
+      ["Classe énergie", "A"]
+    ],
+    advantages: [
+      ["Signature Beko", "Une marque reconnue pour la fiabilité de son électroménager, avec un service après-vente bien implanté."],
+      ["Affichage numérique clair", "L'écran digital indique la température exacte en temps réel, pour un réglage précis au degré près."],
+      ["Triple fonction", "Froid, ventilation et déshumidification couvrent les besoins courants d'une pièce de 30 à 35 m² sans superflu."],
+      ["Minuteur 24 h", "Programmez l'allumage ou l'extinction jusqu'à 24 h à l'avance pour arriver dans une pièce déjà tempérée."]
+    ],
+    guide: "Le Beko BS207C s'adresse à ceux qui veulent un climatiseur efficace et sans complexité, uniquement en mode froid. C'est un excellent compromis prix/fiabilité pour les étés chauds, sans la fonction chauffage des modèles réversibles."
+  },
+  {
+    id: "vedette",
+    tier: "",
+    name: "Vedette V12KR2H – 12 000 BTU",
+    desc: "Climatiseur mobile réversible froid & chaud jusqu'à 35 m². Mode auto, ventilation, déshumidification, télécommande, programmation 24 h. R290 – Classe A.",
+    oldPrice: "449,99 €",
+    newPrice: "414,99 €",
+    discountPct: 8,
+    image: "image-vedette.jpg",
+    specs: [
+      ["Type", "Réversible (froid + chaud)"],
+      ["Surface", "jusqu'à 35 m²"],
+      ["Fonctions", "Auto / Ventil / Déshum"],
+      ["Programmation", "24 h"],
+      ["Réfrigérant", "R290"],
+      ["Classe énergie", "A"]
+    ],
+    advantages: [
+      ["Mode auto intelligent", "L'appareil ajuste lui-même la puissance et la vitesse selon la température ambiante, sans réglage manuel constant."],
+      ["Réversible froid + chaud", "Couvre l'été comme les intersaisons fraîches, un atout pour les logements sans chauffage d'appoint."],
+      ["Programmation 24 h", "Planifiez le fonctionnement à l'avance pour optimiser le confort et la consommation électrique."],
+      ["Format compact", "Pensé pour s'intégrer facilement dans des pièces jusqu'à 35 m² sans prendre toute la place au sol."]
+    ],
+    guide: "Le Vedette V12KR2H se positionne entre l'entrée de gamme et le haut de gamme : réversible comme l'Elsay, mais avec un mode auto et une programmation plus poussée, pour ceux qui veulent un confort plus automatisé sans payer le prix d'un modèle connecté."
+  },
+  {
+    id: "oceanic",
+    tier: "",
+    name: "Oceanic Monobloc – 12 000 BTU",
+    desc: "Climatisation, chauffage, ventilation et déshumidification pour 35 m². 3 530 W, écran numérique, télécommande, minuteur. Gaz R290 – Classe A.",
+    oldPrice: "488,70 €",
+    newPrice: "449,83 €",
+    discountPct: 8,
+    image: "image-oceanic.jpg",
+    specs: [
+      ["Puissance", "3 530 W / 12 000 BTU"],
+      ["Surface", "jusqu'à 35 m²"],
+      ["Fonctions", "Froid / Chaud / Ventil / Déshum"],
+      ["Réfrigérant", "R290"],
+      ["Classe énergie", "A"]
+    ],
+    advantages: [
+      ["4 fonctions en un appareil", "Froid, chaud, ventilation et déshumidification : un climatiseur complet capable de gérer toutes les saisons."],
+      ["Monobloc facile à installer", "Pas d'unité extérieure à fixer : l'appareil se déplace de pièce en pièce et se branche en quelques minutes."],
+      ["Écran numérique + télécommande", "Pilotage précis de la température et des modes, à distance ou directement sur l'appareil."],
+      ["Minuteur intégré", "Programmez les plages de fonctionnement pour ne climatiser que lorsque la pièce est occupée."]
+    ],
+    guide: "L'Oceanic Monobloc cible les foyers qui veulent la polyvalence complète (chaud/froid/déshum/ventil) sans passer par un modèle split à installation fixe. Son format mobile en fait un bon choix pour climatiser plusieurs pièces avec un seul appareil."
+  },
+  {
+    id: "delonghi",
+    tier: "Haut de gamme",
+    name: "De'Longhi Pinguino PAC EL112 Wi-Fi",
+    desc: "Haut de gamme. Cool Surround, Wi-Fi smartphone, jusqu'à 40 m². Mode nuit, filtre lavable, télécommande intelligente. R290 – Classe A+.",
+    oldPrice: "799,00 €",
+    newPrice: "639,20 €",
+    discountPct: 20,
+    image: "image-delonghi.jpg",
+    specs: [
+      ["Puissance", "12 000 BTU"],
+      ["Surface", "jusqu'à 40 m²"],
+      ["Connectivité", "Wi-Fi / Smartphone"],
+      ["Technologie", "Cool Surround"],
+      ["Sonore", "47–50 dB"],
+      ["Réfrigérant", "R290"],
+      ["Classe énergie", "A+"]
+    ],
+    advantages: [
+      ["Technologie Cool Surround", "Diffuse l'air frais à 360° autour de l'appareil pour une climatisation plus homogène que les modèles à flux directionnel classique."],
+      ["Pilotage Wi-Fi", "Allumez, programmez et ajustez la température depuis votre smartphone, où que vous soyez, via l'application dédiée."],
+      ["Mode nuit silencieux", "Réduit automatiquement le bruit et la luminosité de l'écran pour ne pas perturber le sommeil."],
+      ["Filtre lavable", "Un entretien simplifié qui prolonge la durée de vie de l'appareil et maintient un air plus sain au fil des saisons."]
+    ],
+    guide: "Le De'Longhi Pinguino PAC EL112 s'adresse à ceux qui veulent un climatiseur haut de gamme, connecté et silencieux, pour des pièces plus grandes (jusqu'à 40 m²). La classe A+ en fait aussi l'un des modèles mobiles les plus économes en énergie de la sélection."
+  },
+  {
+    id: "midea",
+    tier: "Ultra haut de gamme",
+    name: "Midea PortaSplit Inverter – 12 000 BTU",
+    desc: "Split mobile nouvelle génération. Inverter, 3,5 kW, jusqu'à 42 m², Wi-Fi, mode nuit ultra-silencieux 39–42 dB. Gaz R32 – très haute efficacité.",
+    oldPrice: "1 299,00 €",
+    newPrice: "1 039,20 €",
+    discountPct: 20,
+    image: "image-midea.jpg",
+    specs: [
+      ["Puissance", "3,5 kW / 12 000 BTU"],
+      ["Surface", "jusqu'à 42 m²"],
+      ["Technologie", "Inverter DC"],
+      ["Connectivité", "Wi-Fi / Smartphone"],
+      ["Sonore", "39–42 dB"],
+      ["Réfrigérant", "R32"],
+      ["Type", "Split (int. + ext. séparées)"]
+    ],
+    advantages: [
+      ["Technologie Inverter DC", "Le compresseur module sa puissance en continu plutôt que de s'arrêter/redémarrer, pour une température plus stable et moins de consommation."],
+      ["Format split mobile", "Unité intérieure et extérieure séparées comme un split classique, mais sans installation fixe ni intervention d'un frigoriste."],
+      ["Ultra-silencieux 39–42 dB", "Le niveau sonore le plus bas de la sélection, pensé pour les chambres et le sommeil."],
+      ["Gaz R32 haute efficacité", "Un réfrigérant plus performant énergétiquement, cohérent avec le positionnement ultra haut de gamme de ce modèle."]
+    ],
+    guide: "Le Midea PortaSplit Inverter est le modèle le plus performant de la sélection : technologie split sans installation lourde, Inverter pour une consommation optimisée, et un confort sonore proche d'un climatiseur fixe. Il convient aux grandes pièces (jusqu'à 42 m²) et à ceux qui veulent le meilleur sans travaux."
+  }
+];
+
+let activeId = "beko";
+
+function renderSelector() {
+  const grid = document.getElementById('selectorGrid');
+  grid.innerHTML = '';
+  products.forEach(p => {
+    const card = document.createElement(p.comingSoon ? 'div' : 'button');
+    card.className = 'selector-card' + (p.id === activeId ? ' active' : '') + (p.comingSoon ? ' disabled' : '');
+    if (!p.comingSoon) card.onclick = () => selectProduct(p.id);
+    card.innerHTML = `
+      <span class="selector-check">✓</span>
+      ${p.tier ? `<span class="selector-card-tier">${p.tier}</span>` : ''}
+      <span class="selector-card-name">${p.name}</span>
+      ${p.comingSoon
+        ? `<span class="selector-card-soon">Détails à venir</span>`
+        : `<span class="selector-card-price"><span class="old">${p.oldPrice}</span>${p.newPrice}</span>`
+      }
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function selectProduct(id) {
+  activeId = id;
+  renderSelector();
+  renderDetail();
+}
+
+function renderDetail() {
+  const p = products.find(x => x.id === activeId);
+  if (!p || p.comingSoon) return;
+
+  document.getElementById('breadcrumbName').textContent = p.name;
+  document.getElementById('detailImg').src = p.image;
+  document.getElementById('detailImg').alt = p.name;
+  document.getElementById('detailImgName').textContent = "Image : " + p.image;
+  document.getElementById('detailTier').textContent = p.tier || '';
+  document.getElementById('detailTier').style.display = p.tier ? 'block' : 'none';
+  document.getElementById('detailName').textContent = p.name;
+  document.getElementById('detailDesc').textContent = p.desc;
+  document.getElementById('detailOldPrice').textContent = p.oldPrice;
+  document.getElementById('detailNewPrice').textContent = p.newPrice;
+  document.getElementById('detailSave').textContent = `Économie de ${p.discountPct}%`;
+
+  const badges = document.getElementById('detailBadges');
+  badges.innerHTML = `<span class="hero-mini-badge discount">-${p.discountPct}%</span>` +
+    p.specs.filter(s => s[0] === 'Réfrigérant' || s[0] === 'Classe énergie')
+      .map(s => `<span class="hero-mini-badge">${s[1]}</span>`).join('');
+
+  const specsGrid = document.getElementById('specsGrid');
+  specsGrid.innerHTML = p.specs.map(s => `
+    <div class="specs-full-row"><span>${s[0]}</span><strong>${s[1]}</strong></div>
+  `).join('');
+
+  document.getElementById('advTitle').textContent = `Pourquoi choisir le ${p.name}`;
+  const advGrid = document.getElementById('advGrid');
+  advGrid.innerHTML = (p.advantages || []).map((a, i) => `
+    <div class="about-text-card">
+      <div class="icon-circle">${String(i + 1).padStart(2, '0')}</div>
+      <h3>${a[0]}</h3>
+      <p>${a[1]}</p>
+    </div>
+  `).join('');
+
+  document.getElementById('guideBox').textContent = p.guide || '';
+}
+
+renderSelector();
+renderDetail();
+
+/* ============================
+   PANIER PARTAGÉ AVEC index.html
+   Clé localStorage commune : climareon_cart
+   Format : [{ id, name, price, oldPrice, image, qty }]
+============================= */
+const CART_KEY = 'climareon_cart';
+
+function getCart() {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCart(cart) {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    // Avertit les autres onglets/pages ouvertes (ex: index.html) que le panier a changé
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
+  } catch (e) {
+    console.error('Impossible d\'enregistrer le panier', e);
+  }
+}
+
+function addCurrentProductToCart() {
+  const p = products.find(x => x.id === activeId);
+  if (!p || p.comingSoon) return;
+
+  const cart = getCart();
+  const existing = cart.find(item => item.id === p.id);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      id: p.id,
+      name: p.name,
+      price: p.newPrice,
+      oldPrice: p.oldPrice,
+      image: p.image,
+      qty: 1
+    });
+  }
+  saveCart(cart);
+  showCartToast(`${p.name} ajouté au panier`);
+}
+
+let toastTimeout;
+function showCartToast(message) {
+  const toast = document.getElementById('cartToast');
+  document.getElementById('cartToastText').textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+document.getElementById('addToCartBtn').addEventListener('click', addCurrentProductToCart);
+</script>
+
+</body>
+</html>
